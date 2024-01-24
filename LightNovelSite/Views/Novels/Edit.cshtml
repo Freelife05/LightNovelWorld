@@ -20,6 +20,11 @@
                     <input asp-for="Chapters" class="form-control" />
                     <span asp-validation-for="Chapters" class="text-danger"></span>
                 </div>
+                <div class="form-group">
+                    <label asp-for="ImageURL" class="control-label"></label>
+                    <input asp-for="ImageURL" class="form-control" />
+                    <span asp-validation-for="ImageURL" class="text-danger"></span>
+                </div>
                 <div class="form-group d-flex justify-content-between">
                     <button type="submit" class="btn btn-primary mr-2">Save</button>
                     <a asp-action="Index" class="btn btn-secondary">Back to List</a>

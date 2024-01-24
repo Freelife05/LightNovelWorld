@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace LightNovelSite.Data.Migrations
+namespace LightNovelSite.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231206181303_Initial")]
-    partial class Initial
+    [Migration("20240124172138_NameToLinks")]
+    partial class NameToLinks
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -52,6 +52,31 @@ namespace LightNovelSite.Data.Migrations
                     b.ToTable("Chapter");
                 });
 
+            modelBuilder.Entity("LightNovelSite.Models.NamesToLinks", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
+
+                    b.Property<string>("Link")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NovelTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Word")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("NamesToLinks");
+                });
+
             modelBuilder.Entity("LightNovelSite.Models.Novels", b =>
                 {
                     b.Property<string>("Title")
@@ -62,6 +87,14 @@ namespace LightNovelSite.Data.Migrations
 
                     b.Property<int>("CurrentChapter")
                         .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageURL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Title");
 

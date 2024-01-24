@@ -10,18 +10,43 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Existing fields -->
             <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
+                <label asp-for="ImageURL" class="control-label">Image URL</label>
+                <input asp-for="ImageURL" class="form-control" />
+                <span asp-validation-for="ImageURL" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label">Title</label>
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Chapters" class="control-label"></label>
+                <label asp-for="Chapters" class="control-label">Chapters</label>
                 <input asp-for="Chapters" class="form-control" />
                 <span asp-validation-for="Chapters" class="text-danger"></span>
             </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <!-- Words and Links array -->
+            <div id="wordLinkContainer">
+                <div class="wordLinkPair">
+                    <label>Word:</label>
+                    <input type="text" name="Words[0]" class="form-control wordInput" />
+
+                    <label>Link:</label>
+                    <input type="text" name="link[0]" class="form-control linkInput" />
+                </div>
+            </div>
+            <button type="button" onclick="addWordLinkPair()">Add Word & Link</button>
+
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
@@ -33,9 +58,31 @@
     <a asp-action="Index" class="btn btn-dark btn-sm">Back to List</a>
 </div>
 
-
-
 @section Scripts {
+    <script>
+        function addWordLinkPair() {
+            var container = $("#wordLinkContainer");
+            var count = container.children().length;
+
+            var pair = $("<div>")
+                .addClass("wordLinkPair");
+
+            var wordInput = $("<input>")
+                .attr("type", "text")
+                .attr("name", "Words[" + count + "]")
+                .addClass("form-control wordInput");
+
+            var linkInput = $("<input>")
+                .attr("type", "text")
+                .attr("name", "link[" + count + "]")
+                .addClass("form-control linkInput");
+
+            pair.append('<label>Word:</label>').append(wordInput);
+            pair.append('<label>Link:</label>').append(linkInput);
+
+            container.append(pair);
+        }
+    </script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
