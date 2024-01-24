@@ -12,5 +12,7 @@ namespace LightNovelSite.Data
         }
         public DbSet<LightNovelSite.Models.Novels>? Novels { get; set; }
         public DbSet<LightNovelSite.Models.Chapter>? Chapter { get; set; }
+        public DbSet<LightNovelSite.Models.NamesToLinks>? NamesToLinks { get; set; }
+        
     }
 }

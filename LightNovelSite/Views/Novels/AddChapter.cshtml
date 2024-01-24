@@ -18,14 +18,14 @@
                     <textarea asp-for="Content" class="form-control" rows="20"></textarea>
                     <span asp-validation-for="Content" class="text-danger"></span>
                 </div>
-                <div>
+                @* <div>
                     <label for="wordToReplace">Word to replace:</label>
                     <input type="text" id="wordToReplace" name="wordToReplace" />
                 </div>
                 <div>
                     <label for="replacementLink">Replacement link:</label>
                     <input type="url" id="replacementLink" name="replacementLink" />
-                </div>
+                </div> *@
                 <input type="hidden" asp-for="NovelTitle" />
                 <input type="hidden" asp-for="Id" />
                 <input type="hidden" asp-for="ChapterNumber" />

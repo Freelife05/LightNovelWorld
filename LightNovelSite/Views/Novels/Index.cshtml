@@ -13,46 +13,35 @@
     }
 </p>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Chapters</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.Title)</td>
-                <td>@Html.DisplayFor(modelItem => item.Chapters)</td>
-                <td>
-                    <div class="actions">
+<div class="novel-container">
+    @foreach (var item in Model)
+    {
+        <div class="novel-item">
+            <a asp-action="Details" asp-route-id="@item.Title" class="link">
+                <img src="@item.ImageURL" alt="@item.Title style="max-width: 100px; max-height: 100px;" />
+            </a>
+            <div class="novel-info">
+                <div>@Html.DisplayFor(modelItem => item.Title)</div>
+                <div>@Html.DisplayFor(modelItem => item.Chapters)</div>
+                <div class="actions">
+                    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                    {
                         <button class="btn btn-primary">
-                            <a asp-action="Read" asp-route-id="@item.Title" class="link">Read</a>
+                            <a asp-action="Edit" asp-route-id="@item.Title" class="link">Edit</a>
                         </button>
                         <button class="btn btn-primary">
-                            <a asp-action="Details" asp-route-id="@item.Title" class="link">Details</a>
+                            <a asp-action="Delete" asp-route-id="@item.Title" class="link">Delete</a>
                         </button>
-                        @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
-                        {
-                            <button class="btn btn-primary">
-                                <a asp-action="Edit" asp-route-id="@item.Title" class="link">Edit</a>
-                            </button>
-                            <button class="btn btn-primary">
-                                <a asp-action="Delete" asp-route-id="@item.Title" class="link">Delete</a>
-                            </button>
-                            <button class="btn btn-primary">
-                                <a asp-action="AddChapter" asp-route-id="@item.Title" class="link">Add Chapter</a>
-                            </button>
-                        }
-                    </div>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                        <button class="btn btn-primary">
+                            <a asp-action="AddChapter" asp-route-id="@item.Title" class="link">Add Chapter</a>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
 
 <style>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" > </script >
@@ -103,6 +92,27 @@
     .link {
         text-decoration: none;
         color: inherit;
+    }
+
+    .novel-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        max-width: 800px; 
+        margin: 0 auto; /
+        flex-direction: row;
+    }
+
+    .novel-item {
+        width: calc(25% - 20px); 
+        background-color: #333;
+        padding: 10px;
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+
+    .novel-info {
+        margin-top: 10px;
     }
 </style>
 

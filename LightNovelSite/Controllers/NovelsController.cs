@@ -122,14 +122,14 @@ namespace LightNovelSite.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddChapter([Bind("NovelTitle,ChapterTitle,ChapterCount,Content,ChapterNumber")] Chapter chapter, string wordToReplace, string replacementLink)
+        public async Task<IActionResult> AddChapter([Bind("NovelTitle,ChapterTitle,ChapterCount,Content,ChapterNumber")] Chapter chapter)
         {
             if (ModelState.IsValid)
             {
-                if (!string.IsNullOrEmpty(chapter.Content) && !string.IsNullOrEmpty(wordToReplace) && !string.IsNullOrEmpty(replacementLink))
+                NamesToLinks[] array = _context.NamesToLinks.Where(opts => opts.NovelTitle == chapter.NovelTitle).ToArray();
+                foreach (var i in array)
                 {
-                    string replacedText = ReplaceWordWithLink(chapter.Content,wordToReplace, replacementLink);
-                    chapter.Content = replacedText;
+                    ReplaceWordWithLink(chapter.Content, i.Word,i.Link);
                 }
                 _context.Add(chapter);
                 await _context.SaveChangesAsync();
@@ -160,23 +160,30 @@ namespace LightNovelSite.Controllers
             {
                 return NotFound();
             }
+
             var novel = await _context.Novels.FindAsync(id);
+            if (novel == null)
+            {
+                return NotFound();
+            }
+
             if (novel.CurrentChapter == novel.Chapters)
             {
-                return View(Index);
+                return RedirectToAction("Index");
             }
-            else
+
+            var chapters = _context.Chapter.FirstOrDefault(item => item.NovelTitle == id && item.ChapterNumber == novel.CurrentChapter + 1);
+            if (chapters == null)
             {
-                var chapters = _context.Chapter.First(item => item.NovelTitle == id && item.ChapterNumber == novel.CurrentChapter + 1);
-                novel.CurrentChapter++;
-                await _context.SaveChangesAsync();
-                if (chapters == null)
-                {
-                    return NotFound();
-                }
-                return View("Read", chapters);
+                return RedirectToAction("Index");
             }
+
+            novel.CurrentChapter++;
+            await _context.SaveChangesAsync();
+
+            return View("Read", chapters);
         }
+
 
         public async Task<IActionResult> Previous(string id)
         {
@@ -184,23 +191,31 @@ namespace LightNovelSite.Controllers
             {
                 return NotFound();
             }
+
             var novel = await _context.Novels.FindAsync(id);
+            if (novel == null)
+            {
+                return NotFound();
+            }
+
             if (novel.CurrentChapter == 0)
             {
-                return View("Index");
+                return RedirectToAction("Index");
             }
-            else
+
+            var chapters = _context.Chapter.FirstOrDefault(item => item.NovelTitle == id && item.ChapterNumber == novel.CurrentChapter - 1);
+            if (chapters == null)
             {
-                var chapters = _context.Chapter.First(item => item.NovelTitle == id && item.ChapterNumber == novel.CurrentChapter - 1);
-                novel.CurrentChapter--;
-                await _context.SaveChangesAsync();
-                if (chapters == null)
-                {
-                    return NotFound();
-                }
-                return View("Read", chapters);
+
+                return RedirectToAction("Index");
             }
+
+            novel.CurrentChapter--;
+            await _context.SaveChangesAsync();
+
+            return View("Read", chapters);
         }
+
 
         // GET: Novels/Create
         [Authorize(Roles = "Admin")]
@@ -211,17 +226,19 @@ namespace LightNovelSite.Controllers
 
         // POST: Novels/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Chapters")] Novels novels)
-
+        public async Task<IActionResult> Create([Bind("Title,Chapters,ImageURL,Description")] Novels novels, string[] Words, string[] link)
         {
             if (ModelState.IsValid)
             {
                 novels.CurrentChapter = 0;
-                _context.Add(novels);
+                for (int i = 0; i < Words.Length; i++)
+                {
+                await _context.NamesToLinks.AddAsync(new NamesToLinks(novels.Title,Words[i], link[i]));
+                }
+                await _context.AddAsync(novels);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -251,7 +268,7 @@ namespace LightNovelSite.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Title,Chapters")] Novels novels)
+        public async Task<IActionResult> Edit(string id, [Bind("Title,Chapters")] Novels novels, string wordToReplace, string replacementLink, string wordToDelete)
         {
             if (id != novels.Title)
             {
@@ -262,7 +279,19 @@ namespace LightNovelSite.Controllers
             {
                 try
                 {
-                    _context.Update(novels);
+                    var existingNovel = await _context.Novels.FindAsync(id);
+                    if (existingNovel == null)
+                    {
+                        return NotFound();
+                    }
+
+
+
+                    // Update other properties
+                    existingNovel.Title = novels.Title;
+                    existingNovel.Chapters = novels.Chapters;
+
+                    _context.Update(existingNovel);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -280,6 +309,15 @@ namespace LightNovelSite.Controllers
             }
             return View(novels);
         }
+
+        private string RemoveWord(string userInput, string wordToDelete)
+        {
+            // Remove the specified word from the text
+            string[] words = userInput.Split(' ');
+            words = words.Where(word => !string.Equals(word, wordToDelete, StringComparison.OrdinalIgnoreCase)).ToArray();
+            return string.Join(" ", words);
+        }
+
 
         // GET: Novels/Delete/5
         [Authorize(Roles = "Admin")]
