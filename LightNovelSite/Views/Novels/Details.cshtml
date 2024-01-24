@@ -34,7 +34,7 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Read">Read</a> |
+    <a asp-action="Read" asp-route-id= "@Model?.Title">Read</a> |
     @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
     {
        <a asp-action="Edit" asp-route-id="@Model?.Title">Edit</a>

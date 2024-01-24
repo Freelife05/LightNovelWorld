@@ -129,7 +129,8 @@ namespace LightNovelSite.Controllers
                 NamesToLinks[] array = _context.NamesToLinks.Where(opts => opts.NovelTitle == chapter.NovelTitle).ToArray();
                 foreach (var i in array)
                 {
-                    ReplaceWordWithLink(chapter.Content, i.Word,i.Link);
+                    chapter.Content = ReplaceWordWithLink(chapter.Content, i.Word,i.Link);
+                    
                 }
                 _context.Add(chapter);
                 await _context.SaveChangesAsync();
@@ -349,10 +350,21 @@ namespace LightNovelSite.Controllers
                 return Problem("Entity set 'ApplicationDbContext.Novels'  is null.");
             }
             var novels = await _context.Novels.FindAsync(id);
+            var chapters = _context.Chapter.Where(Chapter => Chapter.NovelTitle == id);
+            var namelinks = _context.NamesToLinks.Where(namelink =>  namelink.NovelTitle == id);
             if (novels != null)
             {
                 _context.Novels.Remove(novels);
             }
+            if (chapters != null)
+            {
+                _context.Chapter.RemoveRange(chapters);
+            }
+            if (namelinks != null)
+            {
+                _context.NamesToLinks.RemoveRange(namelinks);
+            }
+
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
