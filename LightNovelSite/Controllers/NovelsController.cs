@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using static System.Collections.Specialized.BitVector32;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 
 namespace LightNovelSite.Controllers
@@ -32,6 +33,7 @@ namespace LightNovelSite.Controllers
                         View(await _context.Novels.ToListAsync()) :
                         Problem("Entity set 'ApplicationDbContext.Novels'  is null.");
         }
+
         //Novels/ShowSearchForm
         public async Task<IActionResult> ShowSearchForm()
         {
