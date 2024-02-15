@@ -27,7 +27,7 @@ namespace LightNovelSite.Controllers
         {
             _context = context;
 
-            Factor = 4;
+            Factor = 2;
         }
 
         // GET: Novels
