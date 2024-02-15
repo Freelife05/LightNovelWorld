@@ -1,0 +1,50 @@
+﻿@model ChapterCommentsRef
+
+<h2>List of Chapter Comments</h2>
+
+
+<form asp-action="OpenComments">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+   
+    <div class="form-group">
+        <label asp-for="AddComment" class="control-label">Content</label>
+        <textarea asp-for="AddComment" class="form-control" rows="20"></textarea>
+        <span asp-validation-for="AddComment" class="text-danger"></span>
+    </div>
+
+    <input type="hidden" asp-for="ChapterId" />
+    
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+</form>
+
+
+@if (Model.Comments.Any())
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>User ID</th>
+                <th>Chapter ID</th>
+                <th>Content</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var comment in Model.Comments)
+            {
+                <tr>
+                    <td>@comment.Id</td>
+                    <td>@comment.UserID</td>
+                    <td>@comment.ChapterId</td>
+                    <td>@comment.Content</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No chapter comments available.</p>
+}

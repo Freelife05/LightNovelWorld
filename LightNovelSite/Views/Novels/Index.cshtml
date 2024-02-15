@@ -32,18 +32,32 @@
                     @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
                     {
                         <button class="btn btn-primary">
-                            <a asp-action="Edit" asp-route-id="@item.Title" class="link">Edit</a>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="link">Edit</a>
                         </button>
                         <button class="btn btn-primary">
-                            <a asp-action="Delete" asp-route-id="@item.Title" class="link">Delete</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="link">Delete</a>
                         </button>
                         <button class="btn btn-primary">
-                            <a asp-action="AddChapter" asp-route-id="@item.Title" class="link">Add Chapter</a>
+                            <a asp-action="AddChapter" asp-route-id="@item.Id" class="link">Add Chapter</a>
                         </button>
                     }
                 </div>
             </div>
         </div>
+    }
+</div>
+
+
+<div class="button-container">
+    @if (Model.Any())
+    {
+        <a class="button" asp-action="PrevNovel" asp-route-id="@Model.First().Title">Prev</a>
+        <a class="button" asp-action="NextNovel" asp-route-id="@Model.Last().Title">Next</a>
+    }
+    else
+    {
+        <a class="button" asp-action="PrevNovel" asp-route-id="@null">Prev</a>
+        <a class="button" asp-action="NextNovel" asp-route-id="@null">Next</a>
     }
 </div>
 

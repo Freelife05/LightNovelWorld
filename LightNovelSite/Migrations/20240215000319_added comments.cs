@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LightNovelSite.Migrations
 {
-    public partial class NameToLinks : Migration
+    public partial class addedcomments : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -65,6 +65,21 @@ namespace LightNovelSite.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Comments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserID = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ChapterId = table.Column<int>(type: "int", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "NamesToLinks",
                 columns: table => new
                 {
@@ -83,7 +98,9 @@ namespace LightNovelSite.Migrations
                 name: "Novels",
                 columns: table => new
                 {
-                    Title = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Chapters = table.Column<int>(type: "int", nullable: false),
                     CurrentChapter = table.Column<int>(type: "int", nullable: false),
@@ -91,7 +108,7 @@ namespace LightNovelSite.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Novels", x => x.Title);
+                    table.PrimaryKey("PK_Novels", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -259,6 +276,9 @@ namespace LightNovelSite.Migrations
 
             migrationBuilder.DropTable(
                 name: "Chapter");
+
+            migrationBuilder.DropTable(
+                name: "Comments");
 
             migrationBuilder.DropTable(
                 name: "NamesToLinks");
