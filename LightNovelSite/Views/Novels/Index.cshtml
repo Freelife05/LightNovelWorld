@@ -17,7 +17,7 @@
     @foreach (var item in Model)
     {
         <div class="novel-item">
-            <a asp-action="Details" asp-route-id="@item.Title" class="link">
+            <a asp-action="Details" asp-route-id="@item.Id" class="link">
                 <div class="image-container">
                     <img src="@item.ImageURL" alt="@item.Title" class="novel-image" />
                     <div class="gloss-effect"></div> <!-- Gloss effect overlay -->
@@ -76,7 +76,8 @@
     .novel-item {
         position: relative; /* Positioning for the gloss effect */
         width: calc(20% - 10px); /* Adjust based on your needs */
-        height: 300px; /* Fixed height for the container */
+        height: auto; /* Automatically adjust to content */
+        max-height: 500px
         background-color: #333;
         padding: 10px;
         border-radius: 8px;
@@ -125,6 +126,26 @@
 .image-container:hover .gloss-effect {
     opacity: 1;
 }
+
+   .button-container {
+        display: flex; /* Enable flexbox for positioning */
+        justify-content: center; /* Horizontally center elements */
+   }
+
+    .button { /* Update the selector if needed */
+        text-decoration: none;
+        color: grey; /* Set the border and text color */
+        background-color: transparent; /* Make background transparent */
+        border: 2px solid grey; /* Add a visible border */
+        padding: 7px 15px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease; /* Add a smooth color transition */
+    }
+
+        .button:hover {
+            background-color: grey; /* Fill background on hover */
+            color: white; /* Change text color on hover */
+        }
 
     /* Button styles */
     .btn {

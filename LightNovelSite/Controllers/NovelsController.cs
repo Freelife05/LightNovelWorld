@@ -15,6 +15,7 @@ using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Security.Claims;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace LightNovelSite.Controllers
 {
@@ -169,7 +170,7 @@ namespace LightNovelSite.Controllers
                 return NotFound();
             }
 
-            var novel = await _context.Novels.FindAsync(Int32.Parse(id));
+            var novel = _context.Novels.Where(opt => opt.Title == id).FirstOrDefault();
             if (novel == null)
             {
                 return NotFound();
@@ -200,7 +201,7 @@ namespace LightNovelSite.Controllers
                 return NotFound();
             }
 
-            var novel = await _context.Novels.FindAsync(Int32.Parse(id));
+            var novel = _context.Novels.Where(opt => opt.Title == id).FirstOrDefault();
             if (novel == null)
             {
                 return NotFound();
@@ -430,14 +431,10 @@ namespace LightNovelSite.Controllers
 
         public async Task<IActionResult> PrevNovel(string id)
         {
-
-
             if (id == null || _context.Novels == null)
             {
                 return NotFound();
             }
-
-
 
             var novels = _context.Novels
             .Where(n => n.Title == id)
@@ -446,12 +443,12 @@ namespace LightNovelSite.Controllers
             .Take(Factor)
             .ToList();
 
-
             var novelsCurrent = _context.Novels
              .Where(n => n.Title == id)
              .SelectMany(targetNovel => _context.Novels.Where(n => n.Id >= targetNovel.Id))
              .Take(Factor)
              .ToList();
+
             if (novels.Count() == 0)
             {
                 return View("Index", novelsCurrent);
@@ -459,7 +456,7 @@ namespace LightNovelSite.Controllers
 
             return View("Index", novels);
         }
-
+        [Authorize]
         public async Task<IActionResult> OpenComments(string id) {
             var comments = _context.Comments.Where(c => c.ChapterId == Int32.Parse(id));
             ChapterCommentsRef obj = new ChapterCommentsRef();
@@ -470,6 +467,7 @@ namespace LightNovelSite.Controllers
 
 
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> OpenComments(ChapterCommentsRef commentRef)
         {
@@ -477,9 +475,9 @@ namespace LightNovelSite.Controllers
             comment.ChapterId = commentRef.ChapterId;
             comment.Content = commentRef.AddComment;
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var username = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            comment.UserID = userId;
+            comment.UserName = username;
 
             await _context.AddAsync(comment);
 
@@ -491,6 +489,5 @@ namespace LightNovelSite.Controllers
             obj.Comments = comments;
             return View("Comments", obj);
         }
-
     }
 }

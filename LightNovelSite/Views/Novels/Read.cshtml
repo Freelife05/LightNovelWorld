@@ -4,68 +4,111 @@
 <div class="container">
 
     <h1>
+        @Html.DisplayFor(model => model.ChapterNumber)
+
         @Html.DisplayFor(model => model.ChapterTitle)
+
     </h1>
 
-   @*  <h1>
-        @Html.DisplayFor(model => model.ChapterNumber)
-    </h1> *@
 
-    
+
     @Html.Raw(Model.Content)
 
-    
+
 
     <div class="button-container">
         <a class="button" asp-action="Previous" asp-route-id="@Model.NovelTitle">Previous</a>
         <a class="button" asp-action="Index">Back to List</a>
+        <a class="comments-button" asp-action="OpenComments" asp-route-id="@Model.Id">Comments</a>
         <a class="button" asp-action="Next" asp-route-id="@Model.NovelTitle">Next</a>
     </div>
 </div>
 
 <style>
-    .container {
-        position: relative;
-        min-height: 0vh;
-        padding-bottom: 100px;
+       .container {
+            position: relative;
+            min-height: 0vh;
+            padding-bottom: 100px;
+
     }
 
-    .button-container {
-        position: absolute;
-        bottom: 0px;
-        left: 50%;
-        transform: translateX(-50%);
-        text-align: center;
-        width: 100%;
-        z-index: 999;
+       .button-container {
+            position: absolute;
+            bottom: 0px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            width: 100%;
+            z-index: 999;
+
     }
 
-        .button-container a.button {
-            display: inline-block;
-            margin: 5px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: cornflowerblue;
-            color: white;
-            text-decoration: none;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
+         .button-container a.button {
+              display: inline-block;
+              margin: 5px;
+              padding: 10px 20px;
+              border: none;
+              border-radius: 5px;
+              background-color: grey;
+              color: white;
+              text-decoration: none;
+              cursor: pointer;
+              font-size: 14px;
+              transition: background-color 0.3s ease;
+
+    }
+
+           .button-container a.button:hover {
+                background-color: cadetblue;
+
+    }
+
+      footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 0px 0;
+            color: #fff;
+
+    }
+
+    /* New styling for comments button */
+    .comments-button {
+        display: inline-block;
+        margin: 0px;
+        padding: 10px 20px;
+        border: 1px solid #ccc; /* Grey border */
+        border-radius: 5px;
+        color: #ccc; /* Initial grey text color */
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 14px;
+        position: relative; /* Required for hover effect */
+        overflow: hidden; /* Required for smooth transition */
+    }
+
+
+        .comments-button::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.2); /* Light background color */
+            transition: background-color 0.3s ease, color 0.3s ease; /* Transition both background and text color */
+            opacity: 0;
         }
 
-            .button-container a.button:hover {
-                background-color: rebeccapurple;
-            }
+        .comments-button:hover .comments-button::after {
+            opacity: 1;
+            background-color: rgba(255, 255, 255, 0.8); /* More solid fill color on hover */
+        }
 
-    footer {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        text-align: center;
-        padding: 0px 0;
-        color: #fff;
-    }
+        /* Text color transition */
+        .comments-button:hover {
+            color: white; /* Change text color to white on hover */
+        }
 </style>
 
-<a class="button" asp-action="OpenComments" asp-route-id="@Model.Id">Comments</a>

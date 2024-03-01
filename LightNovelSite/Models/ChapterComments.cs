@@ -7,7 +7,7 @@ namespace LightNovelSite.Models
         [Key]
         public int Id { get; set; }
         [Required]
-        public string UserID { get; set; }
+        public string UserName { get; set; }
 
         [Required]
         public int ChapterId { get; set; }

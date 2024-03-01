@@ -25,9 +25,7 @@
     <table>
         <thead>
             <tr>
-                <th>Id</th>
-                <th>User ID</th>
-                <th>Chapter ID</th>
+                <th>User Name</th>
                 <th>Content</th>
             </tr>
         </thead>
@@ -35,9 +33,7 @@
             @foreach (var comment in Model.Comments)
             {
                 <tr>
-                    <td>@comment.Id</td>
-                    <td>@comment.UserID</td>
-                    <td>@comment.ChapterId</td>
+                    <td>@comment.UserName<td>
                     <td>@comment.Content</td>
                 </tr>
             }
