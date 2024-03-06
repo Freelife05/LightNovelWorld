@@ -4,7 +4,7 @@
 <div class="container">
 
     <h1>
-        @Html.DisplayFor(model => model.ChapterNumber)
+        @(Model.ChapterNumber+1)
 
         @Html.DisplayFor(model => model.ChapterTitle)
 
@@ -17,10 +17,10 @@
 
 
     <div class="button-container">
-        <a class="button" asp-action="Previous" asp-route-id="@Model.NovelTitle">Previous</a>
+        <a class="button" asp-action="Previous" asp-route-id="@Model.NovelId">Previous</a>
         <a class="button" asp-action="Index">Back to List</a>
         <a class="comments-button" asp-action="OpenComments" asp-route-id="@Model.Id">Comments</a>
-        <a class="button" asp-action="Next" asp-route-id="@Model.NovelTitle">Next</a>
+        <a class="button" asp-action="Next" asp-route-id="@Model.NovelId">Next</a>
     </div>
 </div>
 

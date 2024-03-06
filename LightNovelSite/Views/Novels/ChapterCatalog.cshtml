@@ -1,0 +1,66 @@
+﻿@model IEnumerable<LightNovelSite.Models.Chapter>
+
+@{
+    ViewData["Title"] = "Chapers";
+}
+
+<h1>Chapters</h1>
+
+<p>
+    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+    {
+        <button class="btn btn-primary">
+            <a asp-action="AddChapter" asp-route-id="@Model.First().NovelId" class="link">Add Chapter</a>
+        </button>
+    }
+</p>
+
+<div class="novel-container">
+    @foreach (var item in Model)
+    {
+        <a href="@Url.Action("ReadChapter", new { chapterId = item.Id })">&laquo; @item.ChapterTitle</a>
+    }
+</div>
+
+    
+
+
+
+@{
+    int currentPage = ViewBag.PageNumber;
+    int totalPages = ViewBag.TotalPages;
+    
+}
+
+<p>
+    Stranica: @(ViewBag.PageNumber+1)</>
+
+
+    @if (totalPages > 1)
+    {
+        <div class="pagination">
+            @if (currentPage > 0)
+            {
+                <a href="@Url.Action("ChapterCatalog", new { page = 0, pageSize = ViewBag.PageSize })">&laquo; First</a>
+                <a href="@Url.Action("ChapterCatalog", new { page = currentPage - 1, pageSize = ViewBag.PageSize })">&lt; Previous</a>
+            }
+
+            @for (int i = 0; i < totalPages; i++)
+            {
+                if (i == currentPage)
+                {
+                    <span class="current">@(i + 1)</span>
+                }
+                else
+                {
+                    <a href="@Url.Action("ChapterCatalog", new { page = i, pageSize = ViewBag.PageSize })">@(i+1)</a>
+                }
+            }
+
+            @if (currentPage < totalPages)
+            {
+                <a href="@Url.Action("ChapterCatalog", new { page = currentPage + 1, pageSize = ViewBag.PageSize })">Next &gt;</a>
+                <a href="@Url.Action("ChapterCatalog", new { page = totalPages, pageSize = ViewBag.PageSize })">Last &raquo;</a>
+            }
+        </div>
+    }
