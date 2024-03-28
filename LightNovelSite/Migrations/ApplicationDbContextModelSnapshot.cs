@@ -85,9 +85,8 @@ namespace LightNovelSite.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NovelTitle")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("NovelId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Word")
                         .IsRequired()

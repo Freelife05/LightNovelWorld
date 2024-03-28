@@ -6,12 +6,12 @@ namespace LightNovelSite.Models
     {
         [Key]
         public int ID { get; set; }
-        public string NovelTitle { get; set; }
+        public int NovelId { get; set; } // Foreign key for linking to Novel
         public string Word { get; set; }
         public string Link { get; set; }
-        public NamesToLinks(string novelTitle,string word,string link)
+        public NamesToLinks(string word,string link,int novelId)
         {
-            NovelTitle = novelTitle;
+            NovelId = novelId;
             Word = word;
             Link = link;
         }

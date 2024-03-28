@@ -47,7 +47,7 @@
     }
 </div>
 
-
+@* 
 <div class="button-container">
     @if (Model.Any())
     {
@@ -59,7 +59,7 @@
         <a class="button" asp-action="PrevNovel" asp-route-id="@null">Prev</a>
         <a class="button" asp-action="NextNovel" asp-route-id="@null">Next</a>
     }
-</div>
+</div> *@
 
 
 @{
@@ -68,10 +68,35 @@
     
 }
 
-<p>Stranica: @(ViewBag.PageNumber+1)</>
+<p>Page: @(ViewBag.PageNumber+1)</>
 
+    <div class="pagination button-container">
+        @if (currentPage > 0)
+        {
+            <a href="@Url.Action("Catalog", new { page = 0, pageSize = ViewBag.PageSize })" class="button">&laquo; First</a>
+            <a href="@Url.Action("Catalog", new { page = currentPage - 1, pageSize = ViewBag.PageSize })" class="button">&lt; Previous</a>
+        }
 
-    @if (totalPages > 1)
+        @for (int i = 0; i < totalPages; i++)
+        {
+            if (i == currentPage)
+            {
+                <span class="current button">@(i+1)</span>
+            }
+            else
+            {
+                <a href="@Url.Action("Catalog", new { page = i, pageSize = ViewBag.PageSize })" class="button">@(i+1)</a>
+            }
+        }
+
+        @if (currentPage < totalPages)
+        {
+            <a href="@Url.Action("Catalog", new { page = currentPage + 1, pageSize = ViewBag.PageSize })" class="button">Next &gt;</a>
+            <a href="@Url.Action("Catalog", new { page = totalPages, pageSize = ViewBag.PageSize })" class="button">Last &raquo;</a>
+        }
+    </div>
+
+@*     @if (totalPages > 1)
     {
         <div class="pagination">
             @if (currentPage > 0)
@@ -98,7 +123,7 @@
                 <a href="@Url.Action("Catalog", new { page = totalPages, pageSize = ViewBag.PageSize })">Last &raquo;</a>
             }
         </div>
-    }
+    } *@
 <style>
     /* Your existing styles */
 

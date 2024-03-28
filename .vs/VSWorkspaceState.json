@@ -1,7 +1,11 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\LightNovelSite",
+    "\\LightNovelSite\\Controllers",
+    "\\LightNovelSite\\Views",
+    "\\LightNovelSite\\Views\\Novels"
   ],
-  "SelectedNode": "\\LightNovelSite.sln",
+  "SelectedNode": "\\LightNovelSite\\Controllers\\NovelsController.cs",
   "PreviewInSolutionExplorer": false
 }

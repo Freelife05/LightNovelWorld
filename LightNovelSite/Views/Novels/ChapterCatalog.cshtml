@@ -33,10 +33,37 @@
 }
 
 <p>
-    Stranica: @(ViewBag.PageNumber+1)</>
+    Page: @(ViewBag.PageNumber+1)</>
 
 
-    @if (totalPages > 1)
+    <div class="pagination button-container">
+        @if (currentPage > 0)
+        {
+            <a href="@Url.Action("ChapterCatalog", new { page = 0, pageSize = ViewBag.PageSize })" class="button">&laquo; First</a>
+            <a href="@Url.Action("ChapterCatalog", new { page = currentPage - 1, pageSize = ViewBag.PageSize })" class="button">&lt; Previous</a>
+        }
+
+        @for (int i = 0; i < totalPages; i++)
+        {
+            if (i == currentPage)
+            {
+                <span class="current button">@(i+1)</span>
+            }
+            else
+            {
+                <a href="@Url.Action("ChapterCatalog", new { page = i, pageSize = ViewBag.PageSize })" class="button">@(i+1)</a>
+            }
+        }
+
+        @if (currentPage < totalPages)
+        {
+            <a href="@Url.Action("ChapterCatalog", new { page = currentPage + 1, pageSize = ViewBag.PageSize })" class="button">Next &gt;</a>
+            <a href="@Url.Action("ChapterCatalog", new { page = totalPages, pageSize = ViewBag.PageSize })" class="button">Last &raquo;</a>
+        }
+    </div>
+
+
+   @*  @if (totalPages > 1)
     {
         <div class="pagination">
             @if (currentPage > 0)
@@ -63,4 +90,47 @@
                 <a href="@Url.Action("ChapterCatalog", new { page = totalPages, pageSize = ViewBag.PageSize })">Last &raquo;</a>
             }
         </div>
-    }
+    } *@
+
+   <style>
+        .button-container {
+            display: flex; /* Enable flexbox for positioning */
+            justify-content: center; /* Horizontally center elements */
+        }
+
+        .button { /* Update the selector if needed */
+            text-decoration: none;
+            color: grey; /* Set the border and text color */
+            background-color: transparent; /* Make background transparent */
+            border: 2px solid grey; /* Add a visible border */
+            padding: 7px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease; /* Add a smooth color transition */
+        }
+
+            .button:hover {
+                background-color: grey; /* Fill background on hover */
+                color: white; /* Change text color on hover */
+            }
+
+        /* Button styles */
+        .btn {
+            text-decoration: none; /* Remove underline */
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            background-color: #007bff;
+            border-radius: 5px;
+        }
+
+            .btn:hover {
+                background-color: #0056b3;
+            }
+
+            /* Link styles */
+            .btn .link {
+                text-decoration: none; /* Remove underline */
+                color: white;
+            }
+   </style>

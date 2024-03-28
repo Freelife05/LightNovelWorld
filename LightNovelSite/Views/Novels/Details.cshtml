@@ -39,7 +39,9 @@
     @* <a asp-action="NovelChapters" asp-route-id="@Model?.Id" class="btn btn-primary">NovelChapters</a> *@
     @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
     {
-        <a asp-action="Edit" asp-route-id="@Model?.Title" class="btn btn-secondary">Edit</a>
+        <button class="btn btn-primary">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="link">Edit</a>
+        </button>
     }
     <a asp-action="Index" class="btn btn-dark">Back to List</a>
 </div>

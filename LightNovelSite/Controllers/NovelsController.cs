@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Security.Claims;
 using static System.Reflection.Metadata.BlobBuilder;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LightNovelSite.Controllers
 {
@@ -138,7 +139,7 @@ namespace LightNovelSite.Controllers
             {
                 var nov = _context.Novels.Where(a => a.Id == chapter.NovelId).First();
                 nov.Chapters++;
-                NamesToLinks[] array = _context.NamesToLinks.Where(opts => opts.NovelTitle == nov.Title).ToArray();
+                NamesToLinks[] array = _context.NamesToLinks.Where(opts => opts.NovelId == nov.Id).ToArray();
                 foreach (var i in array)
                 {
                     chapter.Content = ReplaceWordWithLink(chapter.Content, i.Word,i.Link);
@@ -251,14 +252,14 @@ namespace LightNovelSite.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Chapters,ImageURL,Description")] Novels novels, string[] Words, string[] link)
+        public async Task<IActionResult> Create([Bind("Title,Chapters,ImageURL,Description")] Novels novels, string[] Words, string[] link, int[] novelId)
         {
             if (ModelState.IsValid)
             {
                 novels.CurrentChapter = 0;
                 for (int i = 0; i < Words.Length; i++)
                 {
-                await _context.NamesToLinks.AddAsync(new NamesToLinks(novels.Title,Words[i], link[i]));
+                    await _context.NamesToLinks.AddAsync(new NamesToLinks( Words[i], link[i], novelId[i]));
                 }
                 await _context.AddAsync(novels);
                 await _context.SaveChangesAsync();
@@ -267,33 +268,56 @@ namespace LightNovelSite.Controllers
             return View(novels);
         }
 
+
         // GET: Novels/Edit/5
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(string id)
+        //[Authorize(Roles = "Admin")]
+        //public async Task<IActionResult> Edit(string id)
+        //{
+        //    if (id == null || _context.Novels == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    var novels = await _context.Novels.FindAsync(Int32.Parse(id));
+        //    if (novels == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return View(novels);
+        //}
+        public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Novels == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var novels = await _context.Novels.FindAsync(Int32.Parse(id));
-            if (novels == null)
+            var novel = await _context.Novels.FindAsync(id);
+            if (novel == null)
             {
                 return NotFound();
             }
-            return View(novels);
+
+            var existingLinkedWords = await _context.NamesToLinks.Where(w => w.NovelId == id).ToListAsync();
+
+            var viewModel = new NovelEditViewModel
+            {
+                Novel = novel,
+                ExistingLinkedWords = existingLinkedWords
+            };
+
+            return View(viewModel);
         }
+
 
         // POST: Novels/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Title,Chapters")] Novels novels, string wordToReplace, string replacementLink, string wordToDelete)
+        public async Task<IActionResult> Edit(int id,Novels novel,NamesToLinks namesToLinks, NovelEditViewModel viewModel, string novelTitle, int novelid)
         {
-            var nov = await _context.Novels.FindAsync(Int32.Parse(id));
-            if (id != novels.Title)
+            if (id != viewModel.Novel.Id)
             {
                 return NotFound();
             }
@@ -302,24 +326,34 @@ namespace LightNovelSite.Controllers
             {
                 try
                 {
-                    var existingNovel = await _context.Novels.FindAsync(Int32.Parse(id));
-                    if (existingNovel == null)
+                    var existingNovel = await _context.Novels.FindAsync(id);
+                    existingNovel.Title = novel.Title ?? existingNovel.Title;
+                    existingNovel.Description = novel.Description ?? existingNovel.Description;
+                    existingNovel.ImageURL = novel.ImageURL ?? existingNovel.ImageURL;
+
+                    // Handle adding new linked words (optional)
+                    if (viewModel.NewLinkedWords != null)
                     {
-                        return NotFound();
+                        var newLinkedWords = viewModel.NewLinkedWords.Select(word =>new NamesToLinks(word, "", id) { NovelId = id }).ToList();
+
+                        _context.NamesToLinks.AddRange(newLinkedWords);
                     }
 
-
-
-                    // Update other properties
-                    existingNovel.Title = novels.Title;
-                    existingNovel.Chapters = novels.Chapters;
+                    // Handle removing linked words (optional)
+                    if (viewModel.DeletedLinkedWordIds != null)
+                    {
+                        var linkedWordsToRemove = _context.NamesToLinks.Where(w => viewModel.DeletedLinkedWordIds.Contains(w.ID) && w.NovelId == id).ToList();
+                        _context.NamesToLinks.RemoveRange(linkedWordsToRemove);
+                    }
 
                     _context.Update(existingNovel);
                     await _context.SaveChangesAsync();
+
+                    return RedirectToAction("Details", new { id = novel.Id });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!NovelsExists(novels.Title))
+                    if (id == null || _context.Novels == null)
                     {
                         return NotFound();
                     }
@@ -328,18 +362,63 @@ namespace LightNovelSite.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(novels);
-        }
 
-        private string RemoveWord(string userInput, string wordToDelete)
-        {
-            // Remove the specified word from the text
-            string[] words = userInput.Split(' ');
-            words = words.Where(word => !string.Equals(word, wordToDelete, StringComparison.OrdinalIgnoreCase)).ToArray();
-            return string.Join(" ", words);
+            // If model validation failed, re-render the edit view with errors
+            return View(viewModel);
         }
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[Authorize(Roles = "Admin")]
+        //[HttpPost]
+        //[ValidateAntiForgeryToken] // Protects against CSRF attacks
+        //public async Task<IActionResult> Edit(int id, Novels novel)
+        //{
+        //    if (id != novel.Id)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    if (ModelState.IsValid) // Check for model validation errors
+        //    {
+        //        try
+        //        {
+        //            // Update properties with new values (if provided)
+        //            var existingNovel = await _context.Novels.FindAsync(id);
+        //            existingNovel.Title = novel.Title ?? existingNovel.Title;
+        //            existingNovel.Description = novel.Description ?? existingNovel.Description;
+        //            existingNovel.ImageURL = novel.ImageURL ?? existingNovel.ImageURL;
+
+        //            // Update linked words (optional, see explanation below)
+
+        //            _context.Update(existingNovel);
+        //            await _context.SaveChangesAsync();
+
+        //            return RedirectToAction("Details", new { id = novel.Id });
+        //        }
+        //        catch (DbUpdateConcurrencyException)
+        //        {
+        //            if (id == null || _context.Novels == null)
+        //            {
+        //                return NotFound();
+        //            }
+        //            else
+        //            {
+        //                throw;
+        //            }
+        //        }
+        //    }
+
+        //    // If model validation failed, re-render the edit view with errors
+        //    return View(novel);
+        //}
+
+        //private string RemoveWord(string userInput, string wordToDelete)
+        //{
+        //    // Remove the specified word from the text
+        //    string[] words = userInput.Split(' ');
+        //    words = words.Where(word => !string.Equals(word, wordToDelete, StringComparison.OrdinalIgnoreCase)).ToArray();
+        //    return string.Join(" ", words);
+        //}
 
 
         // GET: Novels/Delete/5
@@ -373,7 +452,7 @@ namespace LightNovelSite.Controllers
             }
             var novels = await _context.Novels.FindAsync(Int32.Parse(id));
             var chapters = _context.Chapter.Where(Chapter => Chapter.NovelId == novels.Id);
-            var namelinks = _context.NamesToLinks.Where(namelink =>  namelink.NovelTitle == novels.Title);
+            var namelinks = _context.NamesToLinks.Where(namelink =>  namelink.NovelId == novels.Id);
             if (novels != null)
             {
                 _context.Novels.Remove(novels);
@@ -409,9 +488,6 @@ namespace LightNovelSite.Controllers
             {
                 return NotFound();
             }
-
-
-
 
             var novels = _context.Novels
             .Where(n => n.Title == id)
