@@ -1,47 +1,88 @@
-﻿@model LightNovelSite.Models.Novels
+﻿@model NovelEditViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Novel";
 }
 
-<div class="container">
-    <h1>Edit</h1>
+<h2>Edit Novel</h2>
 
-    <h4>Novels</h4>
-    <hr />
+<form asp-action="Edit">
+    <input type="hidden" asp-for="Novel.Id" />
+    <div class="form-group">
+        <label asp-for="Novel.Title" class="control-label"></label>
+        <input asp-for="Novel.Title" class="form-control" />
+        <span asp-validation-for="Novel.Title" class="text-danger"></span>
+    </div>
 
-    <div class="row">
-        <div class="col-md-4">
-            <form asp-action="Edit" asp-controller="Novels">
-                <input type="hidden" asp-for="Id" />
-                <div class="form-group">
-                    <label asp-for="Title" class="control-label"></label>
-                    <input asp-for="Title" class="form-control" />
-                    <span asp-validation-for="Title" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Description" class="control-label"></label>
-                    <textarea asp-for="Description" class="form-control"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="ImageURL" class="control-label"></label>
-                    <input asp-for="ImageURL" class="form-control" />
-                    <span asp-validation-for="ImageURL" class="text-danger"></span>
-                </div>
+    <div class="form-group">
+        <label asp-for="Novel.Description" class="control-label"></label>
+        <textarea asp-for="Novel.Description" class="form-control"></textarea>
+        <span asp-validation-for="Novel.Description" class="text-danger"></span>
+    </div>
 
-                <div class="form-group">
-                    <input type="submit" value="Save" class="btn btn-primary" />
-                </div>
-            </form>
+    <div class="form-group">
+        <label asp-for="Novel.ImageURL" class="control-label"></label>
+        <input asp-for="Novel.ImageURL" class="form-control" />
+        <span asp-validation-for="Novel.ImageURL" class="text-danger"></span>
+    </div>
+
+    <h3>Existing Linked Words</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Word</th>
+                <th>Link</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var linkedWord in Model.ExistingLinkedWords)
+            {
+                <tr>
+                    <td>@linkedWord.Word</td>
+                    <td>@linkedWord.Link</td>
+                    <td>
+                        <input type="checkbox" name="DeletedLinkedWordIds" value="@linkedWord.ID" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h3>Add New Linked Words</h3>
+    <div id="newWordsContainer">
+        <div class="form-group">
+            <label>New Word</label>
+            <input type="text" class="form-control" name="NewLinkedWords" />
+        </div>
+
+        <div class="form-group">
+            <label>New Link</label>
+            <input type="text" class="form-control" name="NewLinks" />
         </div>
     </div>
+
+    <button type="button" class="btn btn-primary" id="addNewWord">Add New Word</button>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        $(document).ready(function () {
+            $("#addNewWord").click(function () {
+                $("#newWordsContainer").append('<div class="form-group"><label>New Word</label><input type="text" class="form-control" name="NewLinkedWords" /></div><div class="form-group"><label>New Link</label><input type="text" class="form-control" name="NewLinks" /></div>');
+            });
+        });
+    </script>
 }
+
+
+
+
 <style>
 
     .container {
