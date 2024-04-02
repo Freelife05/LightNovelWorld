@@ -6,12 +6,9 @@ namespace LightNovelSite.Models
     {
         [Required]
         public int ChapterId { get; set; }
-
         public IEnumerable<ChapterComments> Comments { get; set; }
-
         [Required]
         public string AddComment { get; set; }
 
-        
     }
 }

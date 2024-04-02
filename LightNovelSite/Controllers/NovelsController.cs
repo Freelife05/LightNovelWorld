@@ -351,6 +351,67 @@ namespace LightNovelSite.Controllers
 
             return RedirectToAction(nameof(Index));   
         }
+
+
+
+        public async Task<IActionResult> EditChapter(int id)
+        {
+            if (id == null || _context.Chapter == null)
+            {
+                return NotFound();
+            }
+
+            var chapter = await _context.Chapter.FindAsync(id);
+            if (chapter == null)
+            {
+                return NotFound();
+            }
+
+            return View(chapter); // Pass the chapter object to the Edit view
+        }
+
+        // POST: Chapters/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to,
+        // and validate your inputs before processing the update.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditChapter (int id, Chapter chapter)
+        {
+            if (id != chapter.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(chapter);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction("Index"); // Redirect to Index action after successful edit
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ChapterExists(chapter.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+
+            // If model validation failed, re-render the Edit view with errors
+            return View(chapter);
+        }
+
+        private bool ChapterExists(int id)
+        {
+            return _context.Chapter.Any(e => e.Id == id);
+        }
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         //[Authorize(Roles = "Admin")]
         //[HttpPost]
@@ -460,12 +521,8 @@ namespace LightNovelSite.Controllers
             return (_context.Novels?.Any(e => e.Id == Int32.Parse(id))).GetValueOrDefault();
         }
 
-        //PreviousNovels
-
-
-
          public async Task<IActionResult> NextNovel(string id)
-        {
+         {
             
 
             if (id == null || _context.Novels == null)
@@ -520,10 +577,7 @@ namespace LightNovelSite.Controllers
 
 
             return View("Index", novels);
-        }
-
-
-        
+         }
 
         public async Task<IActionResult> PrevNovel(string id)
         {
@@ -598,7 +652,10 @@ namespace LightNovelSite.Controllers
 
         public async Task<ActionResult> ChapterCatalog(int page = 1,int NovelId = 0)
         {
-            if (NovelId == 0) { return NotFound(); }
+            if (NovelId == 0) 
+            { 
+                return NotFound(); 
+            }
             // Your data retrieval logic here
             var totalItems = await _context.Chapter.Where(i=> i.NovelId == NovelId).CountAsync();
             var totalPages = (int)Math.Ceiling((double)totalItems / Factor) - 1;
@@ -618,7 +675,6 @@ namespace LightNovelSite.Controllers
             return View("ChapterCatalog", result);
         }
 
-        [Authorize]
         public async Task<IActionResult> OpenComments(string id) {
             var comments = _context.Comments.Where(c => c.ChapterId == Int32.Parse(id));
             ChapterCommentsRef obj = new ChapterCommentsRef();
@@ -633,6 +689,7 @@ namespace LightNovelSite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> OpenComments(ChapterCommentsRef commentRef)
         {
+         
             ChapterComments comment = new ChapterComments();
             comment.ChapterId = commentRef.ChapterId;
             comment.Content = commentRef.AddComment;
@@ -651,5 +708,53 @@ namespace LightNovelSite.Controllers
             obj.Comments = comments;
             return View("Comments", obj);
         }
+
+        [Authorize]
+        public async Task<IActionResult> DeleteComment(int id)
+        {
+            var comment = await _context.Comments.FindAsync(id);
+            if (comment == null)
+            {
+                return NotFound();
+            }
+
+            // Check if user is authorized to delete (consider using UserId if added)
+            if (comment.UserName != User.Identity.Name) // Assuming UserName stores username
+            {
+                return Forbid(); // User not authorized
+            }
+
+            _context.Comments.Remove(comment);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("OpenComments", new { id = comment.ChapterId }); // Redirect back to comments
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize] // Add authorization if needed
+        public async Task<IActionResult> EditComment(int id, string editedComment) // Assuming edited content is passed as 'editedComment'
+        {
+            if (string.IsNullOrEmpty(editedComment)) // Check for empty or null content
+            {
+                // Handle empty content error (e.g., return BadRequest or display error message)
+                return BadRequest("Comment content cannot be empty.");
+            }
+
+            var comment = await _context.Comments.FindAsync(id);
+
+            // Ensure authorization: only the comment author can edit
+            if (comment == null || comment.UserName != User.Identity.Name)
+            {
+                return Forbid(); // Or return Unauthorized()
+            }
+
+            comment.Content = editedComment; // Update comment content
+            await _context.SaveChangesAsync();
+
+            // Redirect to appropriate location after successful edit (e.g., comments view)
+            return RedirectToAction("OpenComments", new { id = comment.ChapterId }); // Assuming OpenComments displays comments for a chapter
+        }
+
     }
 }

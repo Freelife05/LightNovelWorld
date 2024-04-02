@@ -5,20 +5,25 @@
 
     <h1>
         @(Model.ChapterNumber+1)
-
         @Html.DisplayFor(model => model.ChapterTitle)
-
     </h1>
 
+    <h4>
+        @Html.Raw(Model.Content)
+    </h4>
 
 
-    @Html.Raw(Model.Content)
+
 
 
     <div class="button-container">
         <a class="button" asp-action="Previous" asp-route-id="@Model.NovelId">Previous</a>
         <a class="button" asp-action="Index">Back to List</a>
         <a class="button" asp-action="OpenComments" asp-route-id="@Model.Id">Comments</a>
+        @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+        {
+            <a class="button" asp-action="EditChapter" asp-route-id="@Model.Id">Edit</a>
+        }
         <a class="button" asp-action="Next" asp-route-id="@Model.NovelId">Next</a>
     </div>
 

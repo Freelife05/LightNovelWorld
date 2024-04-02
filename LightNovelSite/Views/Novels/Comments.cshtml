@@ -1,46 +1,116 @@
 ﻿@model ChapterCommentsRef
 
-<h2>List of Chapter Comments</h2>
 
+<h4>Comments</h4>
 
-<form asp-action="OpenComments">
+<form asp-action="OpenComments" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-   
+
     <div class="form-group">
         <label asp-for="AddComment" class="control-label">Content</label>
-        <textarea asp-for="AddComment" class="form-control" rows="20"></textarea>
+        <textarea asp-for="AddComment" class="form-control" rows="10"></textarea>
         <span asp-validation-for="AddComment" class="text-danger"></span>
     </div>
 
     <input type="hidden" asp-for="ChapterId" />
-    
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary">Save</button>
-    </div>
-</form>
 
+    <button type="submit" class="button">Post</button>
+
+    <a asp-action="Read" asp-route-id="@Model?.ChapterId" class="btn btn-dark">Back to Chapter</a>
+</form>
 
 @if (Model.Comments.Any())
 {
-    <table>
-        <thead>
-            <tr>
-                <th>User Name</th>
-                <th>Content</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var comment in Model.Comments)
-            {
-                <tr>
-                    <td>@comment.UserName<td>
-                    <td>@comment.Content</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="comment-container">
+        @foreach (var comment in Model.Comments)
+        {
+            <div class="comment">
+                <div class="username">@comment.UserName</div>
+                <div class="content">@comment.Content</div>
+
+                @if (comment.UserName == User.Identity.Name)
+                {
+                    <form asp-action="DeleteComment" asp-route-id="@comment.Id">
+                        <button class="delete-button">Delete</button>
+                    </form>
+                }
+
+            </div>
+
+        }
+    </div>
 }
 else
 {
     <p>No chapter comments available.</p>
 }
+
+
+
+<style>
+    .comment-container {
+        display: flex;
+        flex-wrap: wrap; /* Allow comments to wrap onto multiple rows */
+        justify-content: space-between; /* Distribute comments evenly */
+        /* New property: */
+        flex-flow: column; /* Stack comments vertically and add new columns as needed */
+    }
+
+    .comment {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin: 10px;
+        border-radius: 10px;
+    }
+
+    .username {
+        font-weight: bold;
+    }
+
+    .content {
+        margin-top: 5px;
+    }
+
+    .button-container {
+        display: flex; /* Enable flexbox for positioning */
+        justify-content: center; /* Horizontally center elements */
+    }
+
+    .button {
+        text-decoration: none;
+        color: grey;
+        background-color: transparent;
+        border: 2px solid grey;
+        padding: 7px 15px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+        margin: 5px; /* Add margin between buttons */
+    }
+
+        .button:hover {
+            background-color: grey;
+            color: white;
+        }
+
+    .delete-button-container {
+        display: flex; /* Enable flexbox for positioning */
+        justify-content: center; /* Horizontally center elements */
+    }
+
+    .delete-button {
+        text-decoration: none;
+        color: red;
+        background-color: transparent;
+        border: 2px solid red;
+        padding: 7px 15px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+        margin: 5px; /* Add margin between buttons */
+    }
+
+    .delete-button:hover {
+            background-color: red;
+            color: white;
+        }
+
+</style>

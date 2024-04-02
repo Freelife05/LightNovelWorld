@@ -1,0 +1,39 @@
+﻿@model Chapter // Pass the Chapter model to the view
+
+@{
+    ViewData["Title"] = "Edit Chapter";
+}
+
+<h1>Edit Chapter</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" asp-controller="Chapters">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ChapterTitle" class="control-label">Chapter Title</label>
+                <input asp-for="ChapterTitle" class="form-control" />
+                <span asp-validation-for="ChapterTitle" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Content" class="control-label">Content</label>
+                <textarea asp-for="Content" class="form-control" rows="10"></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
