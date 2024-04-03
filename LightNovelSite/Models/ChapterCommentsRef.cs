@@ -10,5 +10,7 @@ namespace LightNovelSite.Models
         [Required]
         public string AddComment { get; set; }
 
+        public int NovelId { get; set; }
+
     }
 }

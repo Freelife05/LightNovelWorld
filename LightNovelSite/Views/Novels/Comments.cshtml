@@ -16,7 +16,7 @@
 
     <button type="submit" class="button">Post</button>
 
-    <a asp-action="Read" asp-route-id="@Model?.ChapterId" class="btn btn-dark">Back to Chapter</a>
+    <a asp-action="Read" asp-route-id="@Model?.NovelId" class="btn btn-dark">Back to Chapter</a>
 </form>
 
 @if (Model.Comments.Any())

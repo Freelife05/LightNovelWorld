@@ -146,8 +146,8 @@ namespace LightNovelSite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddChapter([Bind("NovelId,ChapterTitle,ChapterCount,Content,ChapterNumber")] Chapter chapter)
         {
-            if (ModelState.IsValid)
-            {
+            chapter.OriginalContent = chapter.Content;
+            
                 var nov = _context.Novels.Where(a => a.Id == chapter.NovelId).First();
                 nov.Chapters++;
                 NamesToLinks[] array = _context.NamesToLinks.Where(opts => opts.NovelId == nov.Id).ToArray();
@@ -159,7 +159,6 @@ namespace LightNovelSite.Controllers
                 _context.Add(chapter);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
-            }
             return View(chapter);
         }
 
@@ -337,22 +336,47 @@ namespace LightNovelSite.Controllers
             novel.Title = model.Novel.Title;
             if (model.DeletedLinkedWordIds != null)
             {
+
                 var linkedWordsToDelete = _context.NamesToLinks
             .Where(link => model.DeletedLinkedWordIds.Contains(link.ID))
             .ToList();
+               
             foreach (var i in linkedWordsToDelete)
             {
                     _context.Remove(i);
             }
+               await  _context.SaveChangesAsync();
+                var chapters = _context.Chapter.Where(opt => opt.NovelId == model.Novel.Id).ToList();
+                var namesToLinks = _context.NamesToLinks.Where(opt => opt.NovelId == model.Novel.Id).ToList();
+                foreach (var chapter in chapters) {
+                    chapter.Content = chapter.OriginalContent;
+                    foreach (var word in namesToLinks) {
+                        chapter.Content = ReplaceWordWithLink(chapter.Content,word.Word,word.Link);
+                    }
+                }
             }
+           
             if (!(model.NewLinkedWords.Count == 1 && model.NewLinkedWords[0] == null))
             {
                 for (int i = 0; i < model.NewLinkedWords.Count; i++)
                 {
                     await _context.NamesToLinks.AddAsync(new NamesToLinks(model.NewLinkedWords[i], model.NewLinks[i], model.Novel.Id));
                 }
+                await _context.SaveChangesAsync();
+                var namesToLinks = _context.NamesToLinks.Where(opt => opt.NovelId == model.Novel.Id).ToList();
+                var chapters = _context.Chapter.Where(opt => opt.NovelId == model.Novel.Id).ToList();
+                if (chapters != null)
+                {
+                    foreach (var chapter in chapters)
+                    {
+                        chapter.Content = chapter.OriginalContent;
+                        foreach(var i in namesToLinks) { 
+                            chapter.Content = ReplaceWordWithLink(chapter.Content, i.Word, i.Link);
+                        }
+                    }
+                }
             }
-
+            
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
@@ -382,35 +406,16 @@ namespace LightNovelSite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditChapter (int id, Chapter chapter)
         {
-            if (id != chapter.Id)
-            {
-                return NotFound();
+            var originalChapter = _context.Chapter.Find(id);
+            originalChapter.Content = chapter.OriginalContent;
+            originalChapter.OriginalContent = chapter.OriginalContent;
+            originalChapter.ChapterTitle = chapter.ChapterTitle;
+            var namesToLinks = _context.NamesToLinks.Where(opt => opt.NovelId == originalChapter.NovelId).ToList();
+            foreach (var word in namesToLinks) {
+                originalChapter.Content = ReplaceWordWithLink(originalChapter.Content, word.Word, word.Link);
             }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(chapter);
-                    await _context.SaveChangesAsync();
-
-                    return RedirectToAction("Index"); // Redirect to Index action after successful edit
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ChapterExists(chapter.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
-
-            // If model validation failed, re-render the Edit view with errors
-            return View(chapter);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Read),new { id = originalChapter.NovelId.ToString() });
         }
 
         private bool ChapterExists(int id)
@@ -681,10 +686,12 @@ namespace LightNovelSite.Controllers
         }
 
         public async Task<IActionResult> OpenComments(string id) {
+            var chapter = _context.Chapter.Find(Int32.Parse(id));
             var comments = _context.Comments.Where(c => c.ChapterId == Int32.Parse(id));
             ChapterCommentsRef obj = new ChapterCommentsRef();
             obj.ChapterId = Int32.Parse(id);
             obj.Comments = comments;
+            obj.NovelId= chapter.NovelId;
             return View("Comments", obj);
         }
 

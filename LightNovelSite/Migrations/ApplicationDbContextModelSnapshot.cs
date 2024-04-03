@@ -44,6 +44,10 @@ namespace LightNovelSite.Migrations
                     b.Property<int>("NovelId")
                         .HasColumnType("int");
 
+                    b.Property<string>("OriginalContent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Chapter");
