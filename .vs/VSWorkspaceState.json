@@ -6,6 +6,6 @@
     "\\LightNovelSite\\Views",
     "\\LightNovelSite\\Views\\Novels"
   ],
-  "SelectedNode": "\\LightNovelSite\\Views\\Novels\\Edit.cshtml",
+  "SelectedNode": "\\LightNovelSite\\Controllers\\NovelsController.cs",
   "PreviewInSolutionExplorer": false
 }

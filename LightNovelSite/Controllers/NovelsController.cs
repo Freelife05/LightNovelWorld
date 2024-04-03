@@ -330,26 +330,32 @@ namespace LightNovelSite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(NovelEditViewModel model)
         {
-            
-                var novel = _context.Novels.Find(model.Novel.Id);
-                novel.ImageURL = model.Novel.ImageURL;
-                novel.Description = model.Novel.Description;
-                novel.Title = model.Novel.Title;
 
-               var linkedWordsToDelete = _context.NamesToLinks
-               .Where(link => model.DeletedLinkedWordIds.Contains(link.ID))
-               .ToList();
-                foreach (var i in linkedWordsToDelete) {
+            var novel = _context.Novels.Find(model.Novel.Id);
+            novel.ImageURL = model.Novel.ImageURL;
+            novel.Description = model.Novel.Description;
+            novel.Title = model.Novel.Title;
+            if (model.DeletedLinkedWordIds != null)
+            {
+                var linkedWordsToDelete = _context.NamesToLinks
+            .Where(link => model.DeletedLinkedWordIds.Contains(link.ID))
+            .ToList();
+            foreach (var i in linkedWordsToDelete)
+            {
                     _context.Remove(i);
+            }
+            }
+            if (!(model.NewLinkedWords.Count == 1 && model.NewLinkedWords[0] == null))
+            {
+                for (int i = 0; i < model.NewLinkedWords.Count; i++)
+                {
+                    await _context.NamesToLinks.AddAsync(new NamesToLinks(model.NewLinkedWords[i], model.NewLinks[i], model.Novel.Id));
                 }
+            }
 
-                for (int i = 0; i < model.NewLinkedWords.Count; i++) {
-                    await _context.NamesToLinks.AddAsync(new NamesToLinks(model.NewLinkedWords[i],model.NewLinks[i],model.Novel.Id));
-                }
+            await _context.SaveChangesAsync();
 
-                await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));   
+            return RedirectToAction(nameof(Index));
         }
 
 
@@ -369,7 +375,6 @@ namespace LightNovelSite.Controllers
 
             return View(chapter); // Pass the chapter object to the Edit view
         }
-
         // POST: Chapters/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to,
         // and validate your inputs before processing the update.

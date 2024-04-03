@@ -1,4 +1,5 @@
-﻿@model Chapter // Pass the Chapter model to the view
+﻿@model LightNovelSite.Models.Chapter // Pass the Chapter model to the view
+@Html.Raw(ViewBag.div)
 
 @{
     ViewData["Title"] = "Edit Chapter";
@@ -22,6 +23,7 @@
                 <label asp-for="Content" class="control-label">Content</label>
                 <textarea asp-for="Content" class="form-control" rows="10"></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
+
             </div>
 
             <div class="form-group">

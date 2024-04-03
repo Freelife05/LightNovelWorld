@@ -4,24 +4,24 @@
     ViewData["Title"] = "Chapers";
 }
 
+
+
 <h1>Chapters</h1>
 
-<p>
-    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
-    {
-        <button class="btn btn-primary">
-            <a asp-action="AddChapter" asp-route-id="@Model.First().NovelId" class="link">Add Chapter</a>
-        </button>
-    }
-</p>
-
-<div class="novel-container">
+<div class="chapter-grid">
     @foreach (var item in Model)
     {
-        <a href="@Url.Action("ReadChapter", new { chapterId = item.Id })">&laquo; @item.ChapterTitle</a>
+        <div class="chapter-item">
+            <a href="@Url.Action("ReadChapter", new { chapterId = item.Id })">
+                <div class="chapter-info">
+                    <h3>@item.ChapterTitle</h3>
+                </div>
+                <div class="chapter-overlay">
+                </div>
+            </a>
+        </div>
     }
 </div>
-
     
 
 
@@ -93,6 +93,64 @@
     } *@
 
    <style>
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-gap: 10px;
+        }
+
+        .chapter-item {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 10px;
+            position: relative; /* For hover effects */
+            transition: background-color 0.2s ease;
+        }
+
+            .chapter-item:hover {
+                background-color: #e8e8e8; /* Darken on hover */
+            }
+
+            .chapter-item img {
+                width: 100%;
+                height: auto;
+            }
+
+        .chapter-info {
+            text-align: center;
+        }
+
+        .chapter-overlay {
+            position: absolute; /* Overlap chapter-item content */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%; /* Cover the entire chapter item */
+            background-color: rgba(0, 0, 0, 0.3); /* Semi-transparent black overlay */
+            opacity: 0; /* Hide initially */
+            transition: opacity 0.2s ease;
+        }
+
+        .chapter-item:hover .chapter-overlay {
+            opacity: 1; /* Reveal overlay on hover */
+        }
+
+        .read-more-button {
+            position: absolute; /* Position button within overlay */
+            bottom: 10px; /* Place button at bottom */
+            left: 50%; /* Center button horizontally */
+            transform: translateX(-50%); /* Center button precisely */
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer; /* Indicate clickable button */
+            transition: background-color 0.2s ease;
+        }
+
+            .read-more-button:hover {
+                background-color: #222; /* Darken button on hover */
+            }
         .button-container {
             display: flex; /* Enable flexbox for positioning */
             justify-content: center; /* Horizontally center elements */
@@ -133,4 +191,6 @@
                 text-decoration: none; /* Remove underline */
                 color: white;
             }
+
+
    </style>
