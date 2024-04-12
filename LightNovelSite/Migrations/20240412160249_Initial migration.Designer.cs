@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LightNovelSite.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240403162946_Chapter Changes")]
-    partial class ChapterChanges
+    [Migration("20240412160249_Initial migration")]
+    partial class Initialmigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -52,6 +52,8 @@ namespace LightNovelSite.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("NovelId");
+
                     b.ToTable("Chapter");
                 });
 
@@ -75,6 +77,8 @@ namespace LightNovelSite.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ChapterId");
 
                     b.ToTable("Comments");
                 });
@@ -103,16 +107,13 @@ namespace LightNovelSite.Migrations
                     b.ToTable("NamesToLinks");
                 });
 
-            modelBuilder.Entity("LightNovelSite.Models.Novels", b =>
+            modelBuilder.Entity("LightNovelSite.Models.Novel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("ChapterCount")
-                        .HasColumnType("int");
 
                     b.Property<int>("CurrentChapter")
                         .HasColumnType("int");
@@ -336,6 +337,28 @@ namespace LightNovelSite.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("LightNovelSite.Models.Chapter", b =>
+                {
+                    b.HasOne("LightNovelSite.Models.Novel", "Novel")
+                        .WithMany("Chapters")
+                        .HasForeignKey("NovelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Novel");
+                });
+
+            modelBuilder.Entity("LightNovelSite.Models.ChapterComments", b =>
+                {
+                    b.HasOne("LightNovelSite.Models.Chapter", "Chapter")
+                        .WithMany("Comments")
+                        .HasForeignKey("ChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chapter");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -385,6 +408,16 @@ namespace LightNovelSite.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("LightNovelSite.Models.Chapter", b =>
+                {
+                    b.Navigation("Comments");
+                });
+
+            modelBuilder.Entity("LightNovelSite.Models.Novel", b =>
+                {
+                    b.Navigation("Chapters");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,23 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using LightNovelSite.Data;
+﻿using LightNovelSite.Data;
 using LightNovelSite.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using static System.Collections.Specialized.BitVector32;
-using System.Xml.Linq;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using static System.Reflection.Metadata.BlobBuilder;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace LightNovelSite.Controllers
 {
@@ -37,7 +23,7 @@ namespace LightNovelSite.Controllers
         public async Task<IActionResult> Index()
         {
             ViewBag.PageNumber = 0;
-            var totalItems = await _context.Novels.CountAsync();
+            var totalItems = await _context.Novels!.CountAsync();
             var totalPages = (int)Math.Ceiling((double)totalItems / Factor);
             ViewBag.totalPages = totalPages;
             return _context.Novels != null ?
@@ -74,10 +60,11 @@ namespace LightNovelSite.Controllers
         // GET: Novels/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            var novels = await _context.Novels
+            var novels = await _context.Novels!
+                .Include(n => n.Chapters)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (id == null ||novels is null|| _context.Novels == null)
+            if (novels is null || _context.Novels == null)
             {
                 return NotFound();
             }
@@ -87,17 +74,20 @@ namespace LightNovelSite.Controllers
 
         public async Task<IActionResult> AddChapter(int id)
         {
-            var novels = await _context.Novels
+            var novels = await _context.Novels!
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (id == null ||novels is null|| _context.Novels == null)
+            if (novels is null || _context.Novels == null)
             {
                 return NotFound();
             }
+
             Chapter ch = new Chapter();
             ch.NovelId = novels.Id;
-            ch.ChapterNumber = novels.ChapterCount;
+            ch.ChapterNumber = novels.Chapters.Count;
+
             _context.SaveChanges();
+
             return View(ch);
         }
 
@@ -136,67 +126,60 @@ namespace LightNovelSite.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddChapter([Bind("NovelId,ChapterTitle,ChapterCount,Content,ChapterNumber")] Chapter chapter)
+        public async Task<IActionResult> AddChapter([Bind("NovelId,ChapterTitle,Content,ChapterNumber")] Chapter chapter)
         {
             chapter.OriginalContent = chapter.Content;
 
-            var nov = _context.Novels.Where(a => a.Id == chapter.NovelId).First();
-            nov.ChapterCount++;
-            NamesToLinks[] array = _context.NamesToLinks.Where(opts => opts.NovelId == nov.Id).ToArray();
+            var nov = _context.Novels!.Where(a => a.Id == chapter.NovelId).First();
+            NamesToLinks[] array = _context.NamesToLinks!.Where(opts => opts.NovelId == nov.Id).ToArray();
             foreach (var i in array)
             {
                 chapter.Content = ReplaceWordWithLink(chapter.Content, i.Word, i.Link);
 
             }
-            _context.Add(chapter);
+            nov.Chapters.Add(chapter);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-            return View(chapter);
         }
 
         public async Task<IActionResult> Read(int id)
         {
-            if (id == null || _context.Novels == null)
+            if ( _context.Novels == null)
             {
                 return NotFound();
             }
             var novel = await _context.Novels.FindAsync(id);
-            var chapters = _context.Chapter.FirstOrDefault(item => item.NovelId == novel.Id && item.ChapterNumber == novel.CurrentChapter);
+            var chapters = _context.Chapter!.FirstOrDefault(item => item.NovelId == novel!.Id && item.ChapterNumber == novel.CurrentChapter);
             if (chapters == null)
             {
                 return NotFound();
             }
-            chapters.Content = "<p>" + chapters.Content  + "</p>";
+            chapters.Content = "<p>" + chapters.Content + "</p>";
             return View(chapters);
         }
 
         public async Task<IActionResult> ReadChapter(int chapterId)
         {
 
-            var chapter = _context.Chapter.Find(chapterId);
-            chapter.Content = "<p>" + chapter.Content + "</p>";
+            var chapter = _context.Chapter!.Find(chapterId);
+            chapter!.Content = "<p>" + chapter.Content + "</p>";
             return View("Read", chapter);
         }
 
         public async Task<IActionResult> Next(int id)
         {
-            if (id == null || _context.Novels == null)
-            {
-                return NotFound();
-            }
-
-            var novel = _context.Novels.Where(opt => opt.Id ==(id)).FirstOrDefault();
+            var novel = _context.Novels!.Where(opt => opt.Id == (id)).FirstOrDefault();
             if (novel == null)
             {
                 return NotFound();
             }
 
-            if (novel.CurrentChapter == novel.ChapterCount)
+            if (novel.CurrentChapter == novel.Chapters.Count)
             {
                 return RedirectToAction("Details", novel);
             }
 
-            var chapters = _context.Chapter.FirstOrDefault(item => item.NovelId == novel.Id && item.ChapterNumber == novel.CurrentChapter + 1);
+            var chapters = _context.Chapter!.FirstOrDefault(item => item.NovelId == novel.Id && item.ChapterNumber == novel.CurrentChapter + 1);
 
             if (chapters == null)
             {
@@ -212,12 +195,8 @@ namespace LightNovelSite.Controllers
 
         public async Task<IActionResult> Previous(int id)
         {
-            if (id == null || _context.Novels == null)
-            {
-                return NotFound();
-            }
 
-            var novel = _context.Novels.Where(opt => opt.Id == id).FirstOrDefault();
+            var novel = _context.Novels!.Where(opt => opt.Id == id).FirstOrDefault();
             if (novel == null)
             {
                 return NotFound();
@@ -228,7 +207,7 @@ namespace LightNovelSite.Controllers
                 return RedirectToAction("Details", novel);
             }
 
-            var chapters = _context.Chapter.FirstOrDefault(item => item.NovelId == novel.Id && item.ChapterNumber == novel.CurrentChapter - 1);
+            var chapters = _context.Chapter!.FirstOrDefault(item => item.NovelId == novel.Id && item.ChapterNumber == novel.CurrentChapter - 1);
             if (chapters is null)
             {
 
@@ -254,7 +233,7 @@ namespace LightNovelSite.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,ChapterCount,ImageURL,Description")] Novel novels, string[] Words, string[] link)
+        public async Task<IActionResult> Create([Bind("Title,ImageURL,Description")] Novel novels, string[] Words, string[] link)
         {
             if (ModelState.IsValid)
             {
@@ -263,7 +242,7 @@ namespace LightNovelSite.Controllers
                 await _context.SaveChangesAsync();
                 for (int i = 0; i < Words.Length; i++)
                 {
-                    await _context.NamesToLinks.AddAsync(new NamesToLinks(Words[i], link[i], novels.Id));
+                    await _context.NamesToLinks!.AddAsync(new NamesToLinks(Words[i], link[i], novels.Id));
                 }
 
                 await _context.SaveChangesAsync();
@@ -296,13 +275,13 @@ namespace LightNovelSite.Controllers
                 return NotFound();
             }
 
-            var novel = await _context.Novels.FindAsync(id);
+            var novel = await _context.Novels!.FindAsync(id);
             if (novel == null)
             {
                 return NotFound();
             }
 
-            var existingLinkedWords = await _context.NamesToLinks.Where(w => w.NovelId == id).ToListAsync();
+            var existingLinkedWords = await _context.NamesToLinks!.Where(w => w.NovelId == id).ToListAsync();
 
             var viewModel = new NovelEditViewModel
             {
@@ -322,14 +301,14 @@ namespace LightNovelSite.Controllers
         public async Task<IActionResult> Edit(NovelEditViewModel model)
         {
 
-            var novel = _context.Novels.Find(model.Novel.Id);
-            novel.ImageURL = model.Novel.ImageURL;
+            var novel = _context.Novels!.Find(model.Novel.Id);
+            novel!.ImageURL = model.Novel.ImageURL;
             novel.Description = model.Novel.Description;
             novel.Title = model.Novel.Title;
             if (model.DeletedLinkedWordIds != null)
             {
 
-                var linkedWordsToDelete = _context.NamesToLinks
+                var linkedWordsToDelete = _context.NamesToLinks!
             .Where(link => model.DeletedLinkedWordIds.Contains(link.ID))
             .ToList();
 
@@ -338,8 +317,8 @@ namespace LightNovelSite.Controllers
                     _context.Remove(i);
                 }
                 await _context.SaveChangesAsync();
-                var chapters = _context.Chapter.Where(opt => opt.NovelId == model.Novel.Id).ToList();
-                var namesToLinks = _context.NamesToLinks.Where(opt => opt.NovelId == model.Novel.Id).ToList();
+                var chapters = _context.Chapter!.Where(opt => opt.NovelId == model.Novel.Id).ToList();
+                var namesToLinks = _context.NamesToLinks!.Where(opt => opt.NovelId == model.Novel.Id).ToList();
                 foreach (var chapter in chapters)
                 {
                     chapter.Content = chapter.OriginalContent;
@@ -354,11 +333,11 @@ namespace LightNovelSite.Controllers
             {
                 for (int i = 0; i < model.NewLinkedWords.Count; i++)
                 {
-                    await _context.NamesToLinks.AddAsync(new NamesToLinks(model.NewLinkedWords[i], model.NewLinks[i], model.Novel.Id));
+                    await _context.NamesToLinks!.AddAsync(new NamesToLinks(model.NewLinkedWords[i], model.NewLinks[i], model.Novel.Id));
                 }
                 await _context.SaveChangesAsync();
-                var namesToLinks = _context.NamesToLinks.Where(opt => opt.NovelId == model.Novel.Id).ToList();
-                var chapters = _context.Chapter.Where(opt => opt.NovelId == model.Novel.Id).ToList();
+                var namesToLinks = _context.NamesToLinks!.Where(opt => opt.NovelId == model.Novel.Id).ToList();
+                var chapters = _context.Chapter!.Where(opt => opt.NovelId == model.Novel.Id).ToList();
                 if (chapters != null)
                 {
                     foreach (var chapter in chapters)
@@ -381,7 +360,7 @@ namespace LightNovelSite.Controllers
 
         public async Task<IActionResult> EditChapter(int id)
         {
-            if (id == null || _context.Chapter == null)
+            if (_context.Chapter == null)
             {
                 return NotFound();
             }
@@ -401,11 +380,11 @@ namespace LightNovelSite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditChapter(int id, Chapter chapter)
         {
-            var originalChapter = _context.Chapter.Find(id);
-            originalChapter.Content = chapter.OriginalContent;
+            var originalChapter = _context.Chapter!.Find(id);
+            originalChapter!.Content = chapter.OriginalContent;
             originalChapter.OriginalContent = chapter.OriginalContent;
             originalChapter.ChapterTitle = chapter.ChapterTitle;
-            var namesToLinks = _context.NamesToLinks.Where(opt => opt.NovelId == originalChapter.NovelId).ToList();
+            var namesToLinks = _context.NamesToLinks!.Where(opt => opt.NovelId == originalChapter.NovelId).ToList();
             foreach (var word in namesToLinks)
             {
                 originalChapter.Content = ReplaceWordWithLink(originalChapter.Content, word.Word, word.Link);
@@ -416,7 +395,7 @@ namespace LightNovelSite.Controllers
 
         private bool ChapterExists(int id)
         {
-            return _context.Chapter.Any(e => e.Id == id);
+            return _context.Chapter!.Any(e => e.Id == id);
         }
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         //[Authorize(Roles = "Admin")]
@@ -476,13 +455,13 @@ namespace LightNovelSite.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            if (id == null || _context.Novels == null)
+            if (_context.Novels == null)
             {
                 return NotFound();
             }
 
             var novels = await _context.Novels
-                .FirstOrDefaultAsync(m => m.Id ==id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (novels == null)
             {
                 return NotFound();
@@ -502,19 +481,19 @@ namespace LightNovelSite.Controllers
                 return Problem("Entity set 'ApplicationDbContext.Novels'  is null.");
             }
             var novels = await _context.Novels.FindAsync(id);
-            var chapters = _context.Chapter.Where(Chapter => Chapter.NovelId == novels.Id);
-            var namelinks = _context.NamesToLinks.Where(namelink => namelink.NovelId == novels.Id);
+            var chapters = _context.Chapter!.Where(Chapter => Chapter.NovelId == novels!.Id);
+            var namelinks = _context.NamesToLinks!.Where(namelink => namelink.NovelId == novels!.Id);
             if (novels != null)
             {
                 _context.Novels.Remove(novels);
             }
             if (chapters != null)
             {
-                _context.Chapter.RemoveRange(chapters);
+                _context.Chapter!.RemoveRange(chapters);
             }
             if (namelinks != null)
             {
-                _context.NamesToLinks.RemoveRange(namelinks);
+                _context.NamesToLinks!.RemoveRange(namelinks);
             }
 
 
@@ -530,8 +509,7 @@ namespace LightNovelSite.Controllers
         public async Task<IActionResult> NextNovel(string id)
         {
 
-
-            if (id == null || _context.Novels == null)
+            if ( _context.Novels == null)
             {
                 return NotFound();
             }
@@ -544,7 +522,7 @@ namespace LightNovelSite.Controllers
 
             var firstNovel = _context.Novels.First();
             var currentNovel = _context.Novels.Where(t => t.Title == id).First();
-            var num = currentNovel.Id - firstNovel.Id+1;
+            var num = currentNovel.Id - firstNovel.Id + 1;
             num = num % Factor;
             if (num == 0) { num = Factor; }
 
@@ -587,7 +565,7 @@ namespace LightNovelSite.Controllers
 
         public async Task<IActionResult> PrevNovel(string id)
         {
-            if (id == null || _context.Novels == null)
+            if (_context.Novels == null)
             {
                 return NotFound();
             }
@@ -629,7 +607,7 @@ namespace LightNovelSite.Controllers
                 // Order the entities by the criteria (e.g., Id) and find the position
                 var orderedEntities = _context.Novels.OrderBy(e => e.Id).ToList();
                 var position = orderedEntities.FindIndex(e => e.Id == targetEntity.Id);
-                ViewBag.Page = (position / Factor) -1;
+                ViewBag.Page = (position / Factor) - 1;
             }
 
             return View("Index", novels);
@@ -638,19 +616,19 @@ namespace LightNovelSite.Controllers
         public async Task<ActionResult> Catalog(int page = 1)
         {
             // Your data retrieval logic here
-            var totalItems = await _context.Novels.CountAsync();
-            var totalPages = (int)Math.Ceiling((double)totalItems / Factor)-1;
+            var totalItems = await _context.Novels!.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalItems / Factor) - 1;
 
             // Ensure the page number is within bounds
             page = Math.Max(0, Math.Min(page, totalPages));
 
             // Your data retrieval logic here, paginating based on page and pageSize
-            int skipCount = page*Factor;  // Number of elements to skip
+            int skipCount = page * Factor;  // Number of elements to skip
 
 
-            var result = _context.Novels.Skip(skipCount).Take(Factor).ToList();
+            var result = _context.Novels!.Skip(skipCount).Take(Factor).ToList();
             ViewBag.PageNumber = page;
-            ViewBag.TotalPages = totalPages  + 1;
+            ViewBag.TotalPages = totalPages + 1;
             ViewBag.PageSize = Factor;
 
             return View("Index", result);
@@ -663,7 +641,7 @@ namespace LightNovelSite.Controllers
                 return NotFound();
             }
             // Your data retrieval logic here
-            var totalItems = await _context.Chapter.Where(i => i.NovelId == NovelId).CountAsync();
+            var totalItems = await _context.Chapter!.Where(i => i.NovelId == NovelId).CountAsync();
             var totalPages = (int)Math.Ceiling((double)totalItems / Factor) - 1;
 
             // Ensure the page number is within bounds
@@ -673,7 +651,7 @@ namespace LightNovelSite.Controllers
             int skipCount = page * Factor;  // Number of elements to skip
 
 
-            var result = _context.Chapter.Skip(skipCount).Take(Factor).ToList();
+            var result = _context.Chapter!.Where(i => i.NovelId == NovelId).Skip(skipCount).Take(Factor).ToList();
             ViewBag.PageNumber = page;
             ViewBag.TotalPages = totalPages + 1;
             ViewBag.PageSize = Factor;
@@ -683,12 +661,12 @@ namespace LightNovelSite.Controllers
 
         public async Task<IActionResult> OpenComments(int id)
         {
-            var chapter = _context.Chapter.Find(id);
-            var comments = _context.Comments.Where(c => c.ChapterId == id);
+            var chapter = _context.Chapter!.Find(id);
+            var comments = _context.Comments!.Where(c => c.ChapterId == id);
             ChapterCommentsRef obj = new ChapterCommentsRef();
             obj.ChapterId = (id);
             obj.Comments = comments;
-            obj.NovelId= chapter.NovelId;
+            obj.NovelId = chapter!.NovelId;
             return View("Comments", obj);
         }
 
@@ -711,8 +689,9 @@ namespace LightNovelSite.Controllers
 
             await _context.SaveChangesAsync();
 
-            var comments = _context.Comments.Where(c => c.ChapterId == commentRef.ChapterId);
+            var comments = _context.Comments!.Where(c => c.ChapterId == commentRef.ChapterId);
             ChapterCommentsRef obj = new ChapterCommentsRef();
+            obj.NovelId = commentRef.NovelId;
             obj.ChapterId = commentRef.ChapterId;
             obj.Comments = comments;
             return View("Comments", obj);
@@ -721,14 +700,14 @@ namespace LightNovelSite.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteComment(int id)
         {
-            var comment = await _context.Comments.FindAsync(id);
+            var comment = await _context.Comments!.FindAsync(id);
             if (comment == null)
             {
                 return NotFound();
             }
 
             // Check if user is authorized to delete (consider using UserId if added)
-            if (comment.UserName != User.Identity.Name) // Assuming UserName stores username
+            if (comment.UserName != User.Identity!.Name) // Assuming UserName stores username
             {
                 return Forbid(); // User not authorized
             }
@@ -750,10 +729,10 @@ namespace LightNovelSite.Controllers
                 return BadRequest("Comment content cannot be empty.");
             }
 
-            var comment = await _context.Comments.FindAsync(id);
+            var comment = await _context.Comments!.FindAsync(id);
 
             // Ensure authorization: only the comment author can edit
-            if (comment == null || comment.UserName != User.Identity.Name)
+            if (comment == null || comment.UserName != User.Identity!.Name)
             {
                 return Forbid(); // Or return Unauthorized()
             }

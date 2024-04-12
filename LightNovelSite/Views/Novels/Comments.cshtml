@@ -10,6 +10,7 @@
         <label asp-for="AddComment" class="control-label">Content</label>
         <textarea asp-for="AddComment" class="form-control" rows="10"></textarea>
         <span asp-validation-for="AddComment" class="text-danger"></span>
+        <input type = "hidden" asp-for = "NovelId" value = "@Model?.NovelId" /> 
     </div>
 
     <input type="hidden" asp-for="ChapterId" />
