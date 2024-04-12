@@ -61,11 +61,11 @@ using(var scope= app.Services.CreateScope())
 using (var scope = app.Services.CreateScope())
 {
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-
+    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
     string email = "novelmanager1@gmail.com";
-    string password = "Stilzone@14";
+    string password = config.GetValue<string>("secrets:novelmanager1");
 
-   if (await userManager.FindByEmailAsync(email) == null)
+    if (await userManager.FindByEmailAsync(email) == null)
     {
         var user = new IdentityUser();
         user.UserName = email;
@@ -80,9 +80,9 @@ using (var scope = app.Services.CreateScope())
 using (var scope = app.Services.CreateScope())
 {
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-
+    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
     string email = "novelmanager2@gmail.com";
-    string password = "Stilzone@14";
+    string password = config.GetValue<string>("secrets:novelmanager2");
 
     if (await userManager.FindByEmailAsync(email) == null)
     {

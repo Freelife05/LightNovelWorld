@@ -10,7 +10,7 @@ namespace LightNovelSite.Data
             : base(options)
         {
         }
-        public DbSet<LightNovelSite.Models.Novels>? Novels { get; set; }
+        public DbSet<LightNovelSite.Models.Novel>? Novels { get; set; }
         public DbSet<LightNovelSite.Models.Chapter>? Chapter { get; set; }
         public DbSet<LightNovelSite.Models.NamesToLinks>? NamesToLinks { get; set; }
         public DbSet<LightNovelSite.Models.ChapterComments>? Comments { get; set; }

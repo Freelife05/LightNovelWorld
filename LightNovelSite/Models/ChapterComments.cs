@@ -13,6 +13,7 @@ namespace LightNovelSite.Models
         public int ChapterId { get; set; }
         [Required]
         public string Content { get; set; }
+        public Chapter Chapter { get; set; }
 
     }
 
