@@ -2,9 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\LightNovelSite",
+    "\\LightNovelSite\\Controllers",
+    "\\LightNovelSite\\Models",
     "\\LightNovelSite\\Views",
     "\\LightNovelSite\\Views\\Novels"
   ],
-  "SelectedNode": "\\LightNovelSite\\Views\\Novels\\Comments.cshtml",
+  "SelectedNode": "\\LightNovelSite\\Controllers\\NovelsController.cs",
   "PreviewInSolutionExplorer": false
 }

@@ -45,7 +45,7 @@ namespace LightNovelSite.Controllers
             if (_context.Novels != null)
             {
                 ViewBag.PageNumber = 0;
-                var totalItems = await _context.Novels.Where(j => j.Title.Contains(SearchTitle)).ToListAsync();
+                var totalItems = await _context.Novels.Where(j => j.Title!.Contains(SearchTitle)).ToListAsync();
                 var totalPages = (int)Math.Ceiling((double)totalItems.Count() / Factor);
                 ViewBag.totalPages = totalPages;
                 return View("Index", totalItems);
@@ -134,7 +134,7 @@ namespace LightNovelSite.Controllers
             NamesToLinks[] array = _context.NamesToLinks!.Where(opts => opts.NovelId == nov.Id).ToArray();
             foreach (var i in array)
             {
-                chapter.Content = ReplaceWordWithLink(chapter.Content, i.Word, i.Link);
+                chapter.Content = ReplaceWordWithLink(chapter.Content!, i.Word, i.Link);
 
             }
             nov.Chapters.Add(chapter);
@@ -144,7 +144,7 @@ namespace LightNovelSite.Controllers
 
         public async Task<IActionResult> Read(int id)
         {
-            if ( _context.Novels == null)
+            if (_context.Novels == null)
             {
                 return NotFound();
             }
@@ -324,7 +324,7 @@ namespace LightNovelSite.Controllers
                     chapter.Content = chapter.OriginalContent;
                     foreach (var word in namesToLinks)
                     {
-                        chapter.Content = ReplaceWordWithLink(chapter.Content, word.Word, word.Link);
+                        chapter.Content = ReplaceWordWithLink(chapter.Content!, word.Word, word.Link);
                     }
                 }
             }
@@ -345,7 +345,7 @@ namespace LightNovelSite.Controllers
                         chapter.Content = chapter.OriginalContent;
                         foreach (var i in namesToLinks)
                         {
-                            chapter.Content = ReplaceWordWithLink(chapter.Content, i.Word, i.Link);
+                            chapter.Content = ReplaceWordWithLink(chapter.Content!, i.Word, i.Link);
                         }
                     }
                 }
@@ -387,10 +387,32 @@ namespace LightNovelSite.Controllers
             var namesToLinks = _context.NamesToLinks!.Where(opt => opt.NovelId == originalChapter.NovelId).ToList();
             foreach (var word in namesToLinks)
             {
-                originalChapter.Content = ReplaceWordWithLink(originalChapter.Content, word.Word, word.Link);
+                originalChapter.Content = ReplaceWordWithLink(originalChapter.Content!, word.Word, word.Link);
             }
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Read), new { id = originalChapter.NovelId.ToString() });
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteChapter(int id)
+        {
+            // Get the chapter by its ID
+            var chapter = await _context.Chapter!.FindAsync(id);
+
+            // Check if chapter exists
+            if (chapter == null)
+            {
+                return NotFound();
+            }
+
+            // Remove the chapter from the database
+            _context.Chapter.Remove(chapter);
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+
+            // Redirect to appropriate location (e.g., list of chapters)
+            return RedirectToAction(nameof(ChapterCatalog), new { id = chapter.NovelId.ToString() });
         }
 
         private bool ChapterExists(int id)
@@ -509,7 +531,7 @@ namespace LightNovelSite.Controllers
         public async Task<IActionResult> NextNovel(string id)
         {
 
-            if ( _context.Novels == null)
+            if (_context.Novels == null)
             {
                 return NotFound();
             }

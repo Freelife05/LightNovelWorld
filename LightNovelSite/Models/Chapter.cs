@@ -11,7 +11,7 @@ namespace LightNovelSite.Models
         public string OriginalContent { get; set; }
         public int ChapterNumber { get; set; }
         public int NovelId { get; set; }
-        public Novel Novel { get; set; }
+        public Novel? Novel { get; set; }
         public List<ChapterComments> Comments { get; set; } = new();
     }
 }

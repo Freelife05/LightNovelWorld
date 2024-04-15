@@ -4,10 +4,9 @@
 <div class="container">
 
     <h1>
-        @(Model.ChapterNumber+1)
-        @Html.DisplayFor(model => model.ChapterTitle)
+        Chapter @(Model.ChapterNumber + 1): @Model.ChapterTitle
     </h1>
-
+    <hr />
     <h4>
         @Html.Raw(Model.Content)
     </h4>
@@ -20,18 +19,18 @@
         <a class="button" asp-action="Previous" asp-route-id="@Model.NovelId">Previous</a>
         <a class="button" asp-action="Index">Back to List</a>
         <a class="button" asp-action="OpenComments" asp-route-id="@Model.Id">Comments</a>
-        @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+        @if (User.Identity!.IsAuthenticated && User.IsInRole("Admin"))
         {
             <a class="button" asp-action="EditChapter" asp-route-id="@Model.Id">Edit</a>
         }
         <a class="button" asp-action="Next" asp-route-id="@Model.NovelId">Next</a>
     </div>
 
-   @*  <div class="button-container">
-        <a class="button" asp-action="Previous" asp-route-id="@Model.NovelId">Previous</a>
-        <a class="button" asp-action="Index">Back to List</a>
-        <a class="comments-button" asp-action="OpenComments" asp-route-id="@Model.Id">Comments</a>
-        <a class="button" asp-action="Next" asp-route-id="@Model.NovelId">Next</a>
+    @*  <div class="button-container">
+    <a class="button" asp-action="Previous" asp-route-id="@Model.NovelId">Previous</a>
+    <a class="button" asp-action="Index">Back to List</a>
+    <a class="comments-button" asp-action="OpenComments" asp-route-id="@Model.Id">Comments</a>
+    <a class="button" asp-action="Next" asp-route-id="@Model.NovelId">Next</a>
     </div> *@
 </div>
 

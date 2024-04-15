@@ -37,7 +37,7 @@
 <div class="text-center mt-4">
     <a asp-action="Read" asp-route-id="@Model?.Id" class="btn btn-primary">Read</a>
     @* <a asp-action="NovelChapters" asp-route-id="@Model?.Id" class="btn btn-primary">NovelChapters</a> *@
-    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+    @if (User.Identity!.IsAuthenticated && User.IsInRole("Admin"))
     {
         <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Edit</a>
     }
