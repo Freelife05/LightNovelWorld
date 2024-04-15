@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<LightNovelSite.Models.Chapter>
 
 @{
-    ViewData["Title"] = "Chapers";
+    ViewData["Title"] = "Chapters";
 }
 
 
@@ -45,8 +45,8 @@
     <div class="pagination button-container">
         @if (currentPage > 0)
         {
-            <a href="@Url.Action("ChapterCatalog", new { page = 0, pageSize = ViewBag.PageSize })" class="button">&laquo; First</a>
-            <a href="@Url.Action("ChapterCatalog", new { page = currentPage - 1, pageSize = ViewBag.PageSize })" class="button">&lt; Previous</a>
+            <a href="@Url.Action("ChapterCatalog", new { page = 0, pageSize = ViewBag.PageSize, NovelId = ViewContext.HttpContext.Request.Query["NovelId"] })" class="button">&laquo; First</a>
+            <a href="@Url.Action("ChapterCatalog", new { page = currentPage - 1, pageSize = ViewBag.PageSize, NovelId = ViewContext.HttpContext.Request.Query["NovelId"] })" class="button">&lt; Previous</a>
         }
 
         @for (int i = 0; i < totalPages; i++)
@@ -63,55 +63,25 @@
 
         @if (currentPage < totalPages)
         {
-            <a href="@Url.Action("ChapterCatalog", new { page = currentPage + 1, pageSize = ViewBag.PageSize })" class="button">Next &gt;</a>
-            <a href="@Url.Action("ChapterCatalog", new { page = totalPages, pageSize = ViewBag.PageSize })" class="button">Last &raquo;</a>
+            <a href="@Url.Action("ChapterCatalog", new { page = currentPage + 1, pageSize = ViewBag.PageSize, NovelId = ViewContext.HttpContext.Request.Query["NovelId"] })" class="button">Next &gt;</a>
+            <a href="@Url.Action("ChapterCatalog", new { page = totalPages, pageSize = ViewBag.PageSize, NovelId = ViewContext.HttpContext.Request.Query["NovelId"] })" class="button">Last &raquo;</a>
         }
     </div>
-
-
-    @*  @if (totalPages > 1)
-    {
-    <div class="pagination">
-    @if (currentPage > 0)
-    {
-    <a href="@Url.Action("ChapterCatalog", new { page = 0, pageSize = ViewBag.PageSize })">&laquo; First</a>
-    <a href="@Url.Action("ChapterCatalog", new { page = currentPage - 1, pageSize = ViewBag.PageSize })">&lt; Previous</a>
-    }
-
-    @for (int i = 0; i < totalPages; i++)
-    {
-    if (i == currentPage)
-    {
-    <span class="current">@(i + 1)</span>
-    }
-    else
-    {
-    <a href="@Url.Action("ChapterCatalog", new { page = i, pageSize = ViewBag.PageSize })">@(i+1)</a>
-    }
-    }
-
-    @if (currentPage < totalPages)
-    {
-    <a href="@Url.Action("ChapterCatalog", new { page = currentPage + 1, pageSize = ViewBag.PageSize })">Next &gt;</a>
-    <a href="@Url.Action("ChapterCatalog", new { page = totalPages, pageSize = ViewBag.PageSize })">Last &raquo;</a>
-    }
-    </div>
-    } *@
 
     <style>
         .chapter-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             grid-gap: 1px;
-            width: 30%; /* Stretch horizontally */
+            width: 30%;
             cursor: pointer; /* Indicate clickable element */
             transition: background-color 0.3s ease; /* Transition for hover effect */
         }
 
             .chapter-grid:hover {
                 background-color: black; /* Background color on hover */
-                color: grey; /* Text color on hover */
-                border-color: black; /* Adjust border color on hover (optional) */
+                color: white; /* Text color on hover */
+                border-color: grey; /* Adjust border color on hover (optional) */
             }
 
         .chapter-item {
@@ -128,12 +98,16 @@
 
         .chapter-grid a {
             text-decoration: none; /* Remove underline */
-            color: grey;
+            color: white;
         }
 
             .chapter-grid a h3 {
-                color: grey;
+                color: white;
             }
+
+        .chapter-item:hover {
+            background-color: black; /* Darken on hover */
+        }
 
         .delete-form {
             position: absolute;
@@ -155,9 +129,6 @@
             display: block; /* Show form on hover */
         }
 
-        .chapter-item:hover {
-            background-color: #e8e8e8; /* Darken on hover */
-        }
 
         .chapter-info {
             text-align: center;
@@ -176,19 +147,6 @@
 
         .chapter-item:hover .chapter-overlay {
             opacity: 1; /* Reveal overlay on hover */
-        }
-
-        .read-more-button {
-            position: absolute; /* Position button within overlay */
-            bottom: 10px; /* Place button at bottom */
-            left: 50%; /* Center button horizontally */
-            transform: translateX(-50%); /* Center button precisely */
-            background-color: #333;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer; /* Indicate clickable button */
-            transition: background-color 0.2s ease;
         }
 
             .read-more-button:hover {

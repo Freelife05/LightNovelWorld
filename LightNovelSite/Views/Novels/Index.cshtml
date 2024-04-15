@@ -47,21 +47,6 @@
     }
 </div>
 
-@*
-<div class="button-container">
-    @if (Model.Any())
-    {
-        <a class="button" asp-action="PrevNovel" asp-route-id="@Model.First().Title">Prev</a>
-        <a class="button" asp-action="NextNovel" asp-route-id="@Model.Last().Title">Next</a>
-    }
-    else
-    {
-        <a class="button" asp-action="PrevNovel" asp-route-id="@null">Prev</a>
-        <a class="button" asp-action="NextNovel" asp-route-id="@null">Next</a>
-    }
-</div> *@
-
-
 @{
     int currentPage = ViewBag.PageNumber;
     int totalPages = ViewBag.TotalPages;
@@ -97,34 +82,6 @@
         }
     </div>
 
-    @*     @if (totalPages > 1)
-    {
-    <div class="pagination">
-    @if (currentPage > 0)
-    {
-    <a href="@Url.Action("Catalog", new { page = 0, pageSize = ViewBag.PageSize })">&laquo; First</a>
-    <a href="@Url.Action("Catalog", new { page = currentPage - 1, pageSize = ViewBag.PageSize })">&lt; Previous</a>
-    }
-
-    @for (int i = 0; i < totalPages; i++)
-    {
-    if (i == currentPage)
-    {
-    <span class="current">@(i+1)</span>
-    }
-    else
-    {
-    <a href="@Url.Action("Catalog", new { page = i, pageSize = ViewBag.PageSize })">@(i+1)</a>
-    }
-    }
-
-    @if (currentPage < totalPages)
-    {
-    <a href="@Url.Action("Catalog", new { page = currentPage + 1, pageSize = ViewBag.PageSize })">Next &gt;</a>
-    <a href="@Url.Action("Catalog", new { page = totalPages, pageSize = ViewBag.PageSize })">Last &raquo;</a>
-    }
-    </div>
-    } *@
     <style>
         .novel-container {
             display: flex;

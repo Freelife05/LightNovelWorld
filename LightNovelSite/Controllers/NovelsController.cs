@@ -104,25 +104,6 @@ namespace LightNovelSite.Controllers
             return string.Join(" ", words);
         }
 
-
-        //[HttpPost]
-        //public ActionResult ReplaceWord(string userInput, string wordToReplace)
-        //{
-        //    // Check if the word exists in the database
-        //    var wordEntity = ApplicationDbContext.Name.FirstOrDefault(w => w.Word.ToLower() == wordToReplace.ToLower());
-
-        //    if (wordEntity != null)
-        //    {
-        //        string replacementLink = wordEntity.Link;
-        //        string replacedText = ReplaceWordWithLink(userInput, wordToReplace, replacementLink);
-        //        return View("Index", replacedText);
-        //    }
-        //    else
-        //    {
-        //        return View("Index", "Word not found in the database.");
-        //    }
-        //}
-
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -251,23 +232,6 @@ namespace LightNovelSite.Controllers
             return View(novels);
         }
 
-
-        // GET: Novels/Edit/5
-        //[Authorize(Roles = "Admin")]
-        //public async Task<IActionResult> Edit(string id)
-        //{
-        //    if (id == null || _context.Novels == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var novels = await _context.Novels.FindAsync(Int32.Parse(id));
-        //    if (novels == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    return View(novels);
-        //}
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -419,59 +383,6 @@ namespace LightNovelSite.Controllers
         {
             return _context.Chapter!.Any(e => e.Id == id);
         }
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[Authorize(Roles = "Admin")]
-        //[HttpPost]
-        //[ValidateAntiForgeryToken] // Protects against CSRF attacks
-        //public async Task<IActionResult> Edit(int id, Novels novel)
-        //{
-        //    if (id != novel.Id)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    if (ModelState.IsValid) // Check for model validation errors
-        //    {
-        //        try
-        //        {
-        //            // Update properties with new values (if provided)
-        //            var existingNovel = await _context.Novels.FindAsync(id);
-        //            existingNovel.Title = novel.Title ?? existingNovel.Title;
-        //            existingNovel.Description = novel.Description ?? existingNovel.Description;
-        //            existingNovel.ImageURL = novel.ImageURL ?? existingNovel.ImageURL;
-
-        //            // Update linked words (optional, see explanation below)
-
-        //            _context.Update(existingNovel);
-        //            await _context.SaveChangesAsync();
-
-        //            return RedirectToAction("Details", new { id = novel.Id });
-        //        }
-        //        catch (DbUpdateConcurrencyException)
-        //        {
-        //            if (id == null || _context.Novels == null)
-        //            {
-        //                return NotFound();
-        //            }
-        //            else
-        //            {
-        //                throw;
-        //            }
-        //        }
-        //    }
-
-        //    // If model validation failed, re-render the edit view with errors
-        //    return View(novel);
-        //}
-
-        //private string RemoveWord(string userInput, string wordToDelete)
-        //{
-        //    // Remove the specified word from the text
-        //    string[] words = userInput.Split(' ');
-        //    words = words.Where(word => !string.Equals(word, wordToDelete, StringComparison.OrdinalIgnoreCase)).ToArray();
-        //    return string.Join(" ", words);
-        //}
-
 
         // GET: Novels/Delete/5
         [Authorize(Roles = "Admin")]
@@ -482,7 +393,7 @@ namespace LightNovelSite.Controllers
                 return NotFound();
             }
 
-            var novels = await _context.Novels
+            var novels = await _context.Novels.Include(i => i.Chapters)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (novels == null)
             {

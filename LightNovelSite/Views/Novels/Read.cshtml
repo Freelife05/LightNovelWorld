@@ -26,12 +26,29 @@
         <a class="button" asp-action="Next" asp-route-id="@Model.NovelId">Next</a>
     </div>
 
-    @*  <div class="button-container">
-    <a class="button" asp-action="Previous" asp-route-id="@Model.NovelId">Previous</a>
-    <a class="button" asp-action="Index">Back to List</a>
-    <a class="comments-button" asp-action="OpenComments" asp-route-id="@Model.Id">Comments</a>
-    <a class="button" asp-action="Next" asp-route-id="@Model.NovelId">Next</a>
-    </div> *@
+    <div class="pagination button-container">
+        @if (ViewBag.CurrentPage > 0)
+        {
+            <a href="@Url.Action("ChapterCatalog", new { page = ViewBag.CurrentPage - 1, pageSize = ViewBag.PageSize, NovelId = ViewContext.HttpContext.Request.Query["NovelId"] })" class="button">&lt; Previous</a>
+        }
+
+        @for (int i = 0; i < ViewBag.TotalPages; i++)
+        {
+            if (i == ViewBag.CurrentPage)
+            {
+                <span class="current button">@(i + 1)</span>
+            }
+            else
+            {
+                <a href="@Url.Action("ChapterCatalog", new { page = i, pageSize = ViewBag.PageSize })" class="button">@(i + 1)</a>
+            }
+        }
+
+        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+        {
+            <a href="@Url.Action("ChapterCatalog", new { page = ViewBag.CurrentPage + 1, pageSize = ViewBag.PageSize, NovelId = ViewContext.HttpContext.Request.Query["NovelId"] })" class="button">Next &gt;</a>
+        }
+    </div>
 </div>
 
 <style>
@@ -56,6 +73,7 @@
             background-color: grey;
             color: white;
         }
+
 
 </style>
 

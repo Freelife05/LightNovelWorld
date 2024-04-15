@@ -10,7 +10,6 @@ namespace LightNovelSite.Models
         public string Title { get; set; }
         [Required]
         public string Description { get; set; }
-        //public int ChapterCount { get; set; }
         public int CurrentChapter { get; set; }
         [Required]
         public string ImageURL { get; set; }
